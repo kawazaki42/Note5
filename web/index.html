@@ -1,0 +1,62 @@
+<html>
+  <head></head>
+  <body>
+    <header></header>
+    <main>
+      <div width="50px" height="50px" backgroundcolor="red">
+        <!-- блок -->
+      </div>
+
+      <!-- это ради стилей -->
+      <!-- но надо прописывать отдельно css -->
+      <div class="d1"></div>
+      <div id="id2"></div>
+
+      <div width="100%"></div>
+
+      <!-- от размера экрана -->
+      <div width="100hv%"></div>
+
+      <div width="8mm"></div>
+
+      <div backgroundcolor="#676767">kyky epta</div>
+      <p>параграф</p>
+      <a href="example.org">ссылка</a>
+
+      <!-- лучше так не делать -->
+      <div style="color: red;"></div>
+
+      <!-- flex (не рикардо милоса) -->
+      <div class="flex-example"></div>
+      <style>
+        .flex-example {
+            display: flex;
+
+            /*
+                `row` значит в строку (по умолчанию)
+                `column` в столбец
+                `reversed-row` строка наоборот (для новостей например)
+             */
+            flex-direction: row;
+
+            /* TODO wrap */
+
+            /*
+                `flex-start` идут с начала
+                `flex-end` идут с конца (но в обычном порядке)
+                `center` центр (не глобальный)
+                `space-between`
+                `space-around`
+             */
+            /* justify-content: flex-start; */
+
+            /* внизу но по центру */
+
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+      </style>
+    </main>
+    <footer></footer>
+  </body>
+</html>
