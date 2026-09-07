@@ -1,4 +1,4 @@
-public class Node<Element> {
+public final class Node<Element> {
     public var data: Element
 
     public var left, right: Node<Element>?
@@ -14,11 +14,33 @@ public class Node<Element> {
     }
 }
 
-// extension Node where Element: Comparable {
-//     public func search(item: Element) {
-//         if 
-//     }
-// }
+// typealias MaybeNode<Element> = Node<Element>?
+
+extension Node where Element: Comparable {
+    // public func search(item: Element) {
+    //     if 
+    // }
+
+    fileprivate func insertBinary(_ item: Element) {
+        let new = Node(data: item)
+
+        if item <= self.data {
+            if let left {
+                left.insertBinary(item)
+            } else {
+                left = new
+            }
+            // left?.insertBinary(item) ?? left = Node(data: item)
+        } else {
+            if let right {
+                right.insertBinary(item)
+            } else {
+                right = new
+            }
+            // right?.insertBinary(item) ?? right = Node(data: item)
+        }
+    }
+}
 
 public struct BinarySearchTree<T: Comparable> {
     public var root: Node<T>?
@@ -58,21 +80,29 @@ public struct BinarySearchTree<T: Comparable> {
     }
 
     public mutating func insert(_ item: T) {
-        let new = Node(data: item)
+        // let new = Node(data: item)
 
-        guard let root else {
-            root = new
-            return 
-        }
+        // guard let root else {
+        //     root = new
+        //     return 
+        // }
 
-        let child = if item <= root.data {
-            root.left
+        // var cursor = root
+
+        // if item <= root.data {
+        //     if root.left == nil 
+        //     root.left = new
+        // } else {
+        //     root.right = new
+        // }
+
+        // // var wrapper = BinarySearchTree(root: child)
+
+        // wrapper.insert(item)
+        if let root {
+            root.insertBinary(item)
         } else {
-            root.right
+            root = Node(data: item)
         }
-
-        var wrapper = BinarySearchTree(root: child)
-
-        wrapper.insert(item)
     }
 }
