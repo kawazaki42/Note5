@@ -29,14 +29,16 @@ func sampleTree() -> Node<Int> {
 
     // tree.forEach { print($0) }
 
-    let actual = sampleTree().linearize(order: (.leftChild, .root, .rightChild))
+    let actual = sampleTree()
+        .linearizeDeep(inOrder: (.leftChild, .currentNode, .rightChild))
     let expected = [4, 2, 5, 1, 6, 3, 7]
 
     #expect(expected == actual)
 }
 
 @Test func rootBefore() {
-    let actual = sampleTree().linearize(order: (.root, .leftChild, .rightChild))
+    let actual = sampleTree()
+        .linearizeDeep(inOrder: (.currentNode, .leftChild, .rightChild))
 
     let expected = [1, 2, 4, 5, 3, 6, 7]
 
