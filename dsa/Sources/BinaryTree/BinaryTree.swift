@@ -6,6 +6,20 @@ public enum Direction {
 
 public typealias TraverseOrder = (Direction, Direction, Direction)
 
+// public struct TraverseOrder {
+//     public let first, second, third: Direction
+
+//     public init(
+//         _ first: Direction,
+//         _ second: Direction,
+//         _ third: Direction,
+//     ) {
+//         self.first = first
+//         self.second = second
+//         self.third = third
+//     }
+// }
+
 public final class Node<Element> {
     public var data: Element
 
@@ -25,7 +39,7 @@ public final class Node<Element> {
 
     private func traverseBroadInner(
         _ order: TraverseOrder,
-        action: (Element) -> Void,
+        do action: (Element) -> Void,
     ) {
         [order.0, order.1, order.2].forEach {
             switch $0 {
@@ -46,12 +60,12 @@ public final class Node<Element> {
             case .leftChild:
                 left?.traverseBroadInner(
                     order,
-                    action: action,
+                    do: action,
                 )
             case .rightChild:
                 right?.traverseBroadInner(
                     order,
-                    action: action,
+                    do: action,
                 )
             case .root: Void()
             }
@@ -59,29 +73,29 @@ public final class Node<Element> {
     }
 
     public func traverseBroad(
-        _ order: TraverseOrder = (.root, .leftChild, .rightChild),
-        action: (Element) -> Void,
+        _ order: TraverseOrder = TraverseOrder(.root, .leftChild, .rightChild),
+        do action: (Element) -> Void,
     ) {
         action(data)
 
-        traverseBroadInner(order, action: action)
+        traverseBroadInner(order, do: action)
     }
 
     public func traverseDeep(
         _ order: TraverseOrder,
-        action: (Element) -> Void,
+        do action: (Element) -> Void,
     ) {
         [order.0, order.1, order.2].forEach {
             switch $0 {
             case .leftChild:
                 left?.traverseDeep(
                     order,
-                    action: action,
+                    do: action,
                 )
             case .rightChild:
                 self.right?.traverseDeep(
                     order,
-                    action: action,
+                    do: action,
                 )
             case .root:
                 action(self.data)
@@ -99,10 +113,12 @@ public final class Node<Element> {
         return result
     }
 
-    public func linearizeBroad() -> [Element] {
+    public func linearizeBroad(
+        inOrder: TraverseOrder = (.root, .leftChild, .rightChild),
+    ) -> [Element] {
         var result: [Element] = []
 
-        traverseBroad {
+        traverseBroad(inOrder) {
             result.append($0)
         }
 
