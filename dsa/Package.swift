@@ -18,6 +18,9 @@ let package = Package(
         .target(
             name: "BinaryTree"
         ),
+        .target(
+            name: "BinarySearchTree"
+        ),
         .testTarget(
             name: "dsaTests",
             dependencies: ["BinaryTree"]

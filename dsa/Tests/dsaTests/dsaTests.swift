@@ -1,5 +1,8 @@
 import Testing
 @testable import BinaryTree
+import BinarySearchTree
+
+typealias Node = BinaryTree.Node
 
 // @Test func example() async throws {
 //     // Write your test here and use APIs like `#expect(...)` to check expected conditions.
@@ -57,4 +60,19 @@ func sampleTree() -> Node<Int> {
 
     #expect(actual == expected)
     // print(actual)
+}
+
+@Test func insert() {
+    let root = Node(data: 1)
+
+    root.insertBinary(2)
+
+    root.left = Node(data: 2)
+    root.right = Node(data: 3)
+
+    root.left?.left = Node(data: 4)
+    root.left?.right = Node(data: 5)
+
+    root.right?.left = Node(data: 6)
+    root.right?.right = Node(data: 7)
 }

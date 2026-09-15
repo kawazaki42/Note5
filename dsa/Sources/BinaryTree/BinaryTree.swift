@@ -20,7 +20,7 @@ public typealias TraverseOrder = (Direction, Direction, Direction)
 //     }
 // }
 
-public final class Node<Element> {
+public class Node<Element> {
     public var data: Element
 
     public var
@@ -35,6 +35,40 @@ public final class Node<Element> {
         self.data = data
         self.left = left
         self.right = right
+    }
+
+
+    public func traverseDeep(
+        inOrder order: TraverseOrder,
+        do action: (Element) -> Void,
+    ) {
+        [order.0, order.1, order.2].forEach {
+            switch $0 {
+            case .leftChild:
+                left?.traverseDeep(
+                    inOrder: order,
+                    do: action,
+                )
+            case .rightChild:
+                self.right?.traverseDeep(
+                    inOrder: order,
+                    do: action,
+                )
+            case .currentNode:
+                action(self.data)
+            }
+        }
+    }
+
+
+    public func traverseBroad(
+        inOrder order: TraverseOrder =
+            TraverseOrder(.currentNode, .leftChild, .rightChild),
+        do action: (Element) -> Void,
+    ) {
+        action(data)
+
+        traverseBroadInner(inOrder: order, do: action)
     }
 
     private func traverseBroadInner(
@@ -72,37 +106,6 @@ public final class Node<Element> {
         }
     }
 
-    public func traverseBroad(
-        inOrder order: TraverseOrder =
-            TraverseOrder(.currentNode, .leftChild, .rightChild),
-        do action: (Element) -> Void,
-    ) {
-        action(data)
-
-        traverseBroadInner(inOrder: order, do: action)
-    }
-
-    public func traverseDeep(
-        inOrder order: TraverseOrder,
-        do action: (Element) -> Void,
-    ) {
-        [order.0, order.1, order.2].forEach {
-            switch $0 {
-            case .leftChild:
-                left?.traverseDeep(
-                    inOrder: order,
-                    do: action,
-                )
-            case .rightChild:
-                self.right?.traverseDeep(
-                    inOrder: order,
-                    do: action,
-                )
-            case .currentNode:
-                action(self.data)
-            }
-        }
-    }
 
     public func linearizeDeep(inOrder order: TraverseOrder) -> [Element] {
         var result: [Element] = []
