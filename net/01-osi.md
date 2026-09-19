@@ -1,6 +1,6 @@
 OSIRM
 
-open system interaction reference model
+open system interconnection reference model
 
 эталонная модель взаимодействия открытых систем (ЭМВОС)
 
