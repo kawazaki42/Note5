@@ -1,6 +1,6 @@
 #title[процессы в операционной системе]
 
-#import "../common.typ"
+#import "../lib.typ" as common
 
 #outline()
 
