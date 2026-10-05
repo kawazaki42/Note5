@@ -1,42 +1,78 @@
-import BinaryTree
+// import BinaryTree
 
 
 // typealias MaybeNode<Element> = Node<Element>?
 
-// public protocol BinarySearchTree {
-//     associatedtype Element: Comparable
-// }
+struct BinarySearchTree<Element: Comparable> {
+    var root: LinkedBinaryTreeNode<Element>?
 
-public extension BinaryTree.Node where Element: Comparable {
-    // public func search(item: Element) {
-    //     if 
-    // }
+    mutating public func insert(_ item: Element) {
+        if var root {
+            Self.insert(into: &root, item)
+        } else {
+            root = LinkedBinaryTreeNode(data: item)
+        }
+    }
 
-    // internal func _forceEmitInsertBinary() {
-    //     _ = Node<Int>(data: 0).insertBinary
-    // }
+    private static func insert(into root: inout LinkedBinaryTreeNode<Element>, _ item: Element) {
+        let new = LinkedBinaryTreeNode(data: item)
 
-    // @inlinable
-    func insertBinary(_ item: Element) {
-        let new = Node(data: item)
-
-        if item <= self.data {
-            if let left {
-                left.insertBinary(item)
+        if item <= root.data {
+            if var left = root.left {
+                // left.insert(item)
+                Self.insert(into: &left, item)
             } else {
-                left = new
+                root.left = new
             }
             // left?.insertBinary(item) ?? left = Node(data: item)
         } else {
-            if let right {
-                right.insertBinary(item)
+            if var right = root.right {
+                // right.insert(item)
+                Self.insert(into: &right, item)
             } else {
-                right = new
+                root.right = new
             }
             // right?.insertBinary(item) ?? right = Node(data: item)
         }
     }
 }
+
+// public protocol BinarySearchTree {
+//     associatedtype Element: Comparable
+
+//     func insert(_ item: Element)
+// }
+
+// extension BinaryTree.Node: BinarySearchTree where Element: Comparable {
+//     // public func search(item: Element) {
+//     //     if 
+//     // }
+
+//     // internal func _forceEmitInsertBinary() {
+//     //     _ = Node<Int>(data: 0).insertBinary
+//     // }
+
+//     // @inlinable
+//     public func insert(_ item: Element) {
+//         let new = Node(data: item)
+
+//         if item <= self.data {
+//             if let left {
+//                 left.insert(item)
+//             } else {
+//                 left = new
+//             }
+//             // left?.insertBinary(item) ?? left = Node(data: item)
+//         } else {
+//             if let right {
+//                 right.insert(item)
+//             } else {
+//                 right = new
+//             }
+//             // right?.insertBinary(item) ?? right = Node(data: item)
+//         }
+//     }
+// }
 
 // public struct BinarySearchTree<T: Comparable> {
 //     public var root: Node<T>?

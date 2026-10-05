@@ -20,17 +20,17 @@ public typealias TraverseOrder = (Direction, Direction, Direction)
 //     }
 // }
 
-public class Node<Element> {
+public class LinkedBinaryTreeNode<Element> {
     public var data: Element
 
     public var
-        left: Node<Element>? = nil,
-        right: Node<Element>? = nil
+        left: LinkedBinaryTreeNode<Element>? = nil,
+        right: LinkedBinaryTreeNode<Element>? = nil
 
     public init(
         data: Element,
-        left: Node<Element>? = nil,
-        right: Node<Element>? = nil,
+        left: LinkedBinaryTreeNode<Element>? = nil,
+        right: LinkedBinaryTreeNode<Element>? = nil,
     ) {
         self.data = data
         self.left = left

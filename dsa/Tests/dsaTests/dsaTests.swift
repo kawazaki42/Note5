@@ -2,12 +2,13 @@ import Testing
 @testable import BinaryTree
 import BinarySearchTree
 
-typealias Node = BinaryTree.Node
+typealias Node = BinaryTree.LinkedBinaryTreeNode
 
 // @Test func example() async throws {
 //     // Write your test here and use APIs like `#expect(...)` to check expected conditions.
 // }
 
+/// Create a sample tree
 func sampleTree() -> Node<Int> {
     let root = Node(data: 1)
 
@@ -63,16 +64,24 @@ func sampleTree() -> Node<Int> {
 }
 
 @Test func insert() {
-    let root = Node(data: 1)
+    // let root: BinarySearchTree = Node(data: 1)
 
-    root.insertBinary(2)
+    var tree = BinarySearchTree<Int>(root: nil)
 
-    root.left = Node(data: 2)
-    root.right = Node(data: 3)
+    for i in 0..<10 {
+        tree.insert(i)
+    }
 
-    root.left?.left = Node(data: 4)
-    root.left?.right = Node(data: 5)
+    // (root as BinarySearchTree).insert(2)
 
-    root.right?.left = Node(data: 6)
-    root.right?.right = Node(data: 7)
+    // root.insert(2)
+
+    // root.left = Node(data: 2)
+    // root.right = Node(data: 3)
+
+    // root.left?.left = Node(data: 4)
+    // root.left?.right = Node(data: 5)
+
+    // root.right?.left = Node(data: 6)
+    // root.right?.right = Node(data: 7)
 }

@@ -1,8 +1,7 @@
-#title[процессы в операционной системе]
+#import "../lib.typ": template
+#template[процессы в операционной системе]
 
-#import "../lib.typ" as common
-
-#outline()
+// #outline()
 
 // #let h = [= 67]
 
