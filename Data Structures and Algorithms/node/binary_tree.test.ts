@@ -18,43 +18,47 @@ function sample() {
 
 const { center, left, right } = Direction;
 
-Deno.test.each([
-    {
-        order: [center, left, right],
-        label: 'direct',
-        expected: [1, 2, 4, 5, 3, 6, 7],
-    },
-    {
-        order: [left, right, center],
-        label: 'reverse',
-        expected: [4, 5, 2, 6, 7, 3, 1],
-    },
-    {
-        order: [center, right, left],
-        label: 'right direct',
-        expected: [1, 3, 7, 6, 2, 5, 4],
-    },
-    {
-        order: [right, left, center],
-        label: 'right reverse',
-        expected: [7, 6, 3, 5, 4, 2, 1],
-    },
-    {
-        order: [left, center, right],
-        label: 'symmetric',
-        expected: [4, 2, 5, 1, 6, 3, 7],
-    },
-    {
-        order: [right, center, left],
-        label: 'symmetric right',
-        expected: [7, 3, 6, 1, 5, 2, 4],
-    },
-] as {
+const deepTests: {
     order: DeepTraverseOrder,
     label: string,
     expected: number[]
-}[])("deep traverse ($label)", ({ order, expected }) => {
-    assertEquals(sample().flattenDeep(order), expected);
+}[] = [
+    {
+        label: 'direct',
+        order: [center, left, right],
+        expected: [1, 2, 4, 5, 3, 6, 7],
+    },
+    {
+        label: 'reverse',
+        order: [left, right, center],
+        expected: [4, 5, 2, 6, 7, 3, 1],
+    },
+    {
+        label: 'right direct',
+        order: [center, right, left],
+        expected: [1, 3, 7, 6, 2, 5, 4],
+    },
+    {
+        label: 'right reverse',
+        order: [right, left, center],
+        expected: [7, 6, 3, 5, 4, 2, 1],
+    },
+    {
+        label: 'symmetric',
+        order: [left, center, right],
+        expected: [4, 2, 5, 1, 6, 3, 7],
+    },
+    {
+        label: 'symmetric right',
+        order: [right, center, left],
+        expected: [7, 3, 6, 1, 5, 2, 4],
+    },
+]
+
+Deno.test.each(deepTests)(
+    "deep traverse ($label)",
+    ({ order, expected }) => {
+        assertEquals(sample().flattenDeep(order), expected);
 });
 
 Deno.test({
