@@ -56,3 +56,17 @@ Deno.test.each([
 }[])("deep traverse ($label)", ({ order, expected }) => {
     assertEquals(sample().flattenDeep(order), expected);
 });
+
+Deno.test({
+    name: "broad traverse",
+    fn() {
+        assertEquals(sample().flattenBroad(), [1, 2, 3, 4, 5, 6, 7])
+    },
+});
+
+Deno.test({
+    name: "broad traverse right",
+    fn() {
+        assertEquals(sample().flattenBroad(true), [1, 3, 2, 7, 6, 5, 4])
+    },
+});

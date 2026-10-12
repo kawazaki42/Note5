@@ -18,11 +18,56 @@ abstract class BinaryTree<T> {
         action: Action<T>,
     }): void;
 
+    abstract traverseBroad(options: {
+        action: Action<T>,
+        inverseHorizontal: boolean,
+    }): void;
+
     flattenDeep(order: DeepTraverseOrder = DEFAULT_ORDER): T[] {
         const result: T[] = [];
-        this.traverseDeep({ order, action: it => result.push(it) });
+        const action = (it: T) => result.push(it);
+
+        this.traverseDeep({ order, action });
         return result;
     }
+
+    flattenBroad(inverseHorizontal: boolean = false): T[] {
+        const result: T[] = [];
+        const action = (it: T) => result.push(it);
+
+        this.traverseBroad({ action, inverseHorizontal });
+        return result
+    }
+
+    // flatten(options: {
+    //     deep: true,
+    //     order: DeepTraverseOrder,
+    // } | {
+    //     deep: false,
+    //     inverseHorizontal: boolean,
+    // }): T[] {
+    //     const result: T[] = [];
+    //     const action = (it: T) => result.push(it);
+
+    //     // switch (options.deep) {
+    //     //     case true: {
+    //     //         const { order } = options
+    //     //     }
+
+    //     // }
+
+    //     // options.deep ??= true;
+
+    //     if (options.deep) {
+    //         const { order } = options;
+    //         this.traverseDeep({ action, order });
+    //     } else {
+    //         const { inverseHorizontal } = options;
+    //         this.traverseBroad({ action, inverseHorizontal });
+    //     }
+
+    //     return result;
+    // }
 }
 
 type Action<T> = (element: T) => void
@@ -69,5 +114,35 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
             }
             subtree?.traverseDeep({ action, order });
         }
+    }
+
+    private traverseBroadHeadless(
+        action: Action<T>,
+        inverseHorizontal: boolean,
+    ) {
+        const subtrees = inverseHorizontal
+            ? [this.right, this.left]
+            : [this.left, this.right];
+
+        // Subtree roots (heads) first
+        subtrees.forEach(it => it ? action(it.data) : undefined);
+
+        // Next, subtrees' subtrees
+        subtrees.forEach(it => {
+            it?.traverseBroadHeadless(action, inverseHorizontal)
+        });
+    }
+
+    traverseBroad({
+        action,
+        inverseHorizontal = false,
+    }: {
+        action: Action<T>,
+        inverseHorizontal: boolean,
+    }): void {
+        // Global root (head)
+        action(this.data);
+
+        this.traverseBroadHeadless(action, inverseHorizontal);
     }
 }
