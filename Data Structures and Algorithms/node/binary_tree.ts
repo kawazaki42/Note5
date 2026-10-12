@@ -1,17 +1,33 @@
-enum Direction {
+export enum Direction {
     center,
     left,
     right,
 }
 
-interface BinaryTree<T> {
-    traverseDeep(
+export type DeepTraverseOrder = [Direction, Direction, Direction];
+
+const DEFAULT_ORDER: DeepTraverseOrder = [
+    Direction.center,
+    Direction.left,
+    Direction.right,
+]
+
+abstract class BinaryTree<T> {
+    abstract traverseDeep(options: {
+        order: DeepTraverseOrder,
         action: (element: T) => void,
-        order: [Direction, Direction, Direction],
-    ): void;
+    }): void;
+
+    flattenDeep(order: DeepTraverseOrder = DEFAULT_ORDER): T[] {
+        const result: T[] = [];
+        this.traverseDeep({ order, action: it => result.push(it) });
+        return result;
+    }
 }
 
-class LinkedBinaryTree<T> implements BinaryTree<T> {
+type Action<T> = (element: T) => void
+
+export class LinkedBinaryTree<T> extends BinaryTree<T> {
     data: T;
     left?: LinkedBinaryTree<T>;
     right?: LinkedBinaryTree<T>;
@@ -21,6 +37,8 @@ class LinkedBinaryTree<T> implements BinaryTree<T> {
         left?: LinkedBinaryTree<T>,
         right?: LinkedBinaryTree<T>,
     ) {
+        super();
+
         this.data = data;
         this.left = left;
         this.right = right;
@@ -32,10 +50,13 @@ class LinkedBinaryTree<T> implements BinaryTree<T> {
     //     }
     // }
 
-    traverseDeep(
+    // traverseDeep(action: Action<T>): void;
+    // travarseDeep()
+
+    traverseDeep({order = DEFAULT_ORDER, action}: {
+        order?: DeepTraverseOrder,
         action: (element: T) => void,
-        order = [Direction.left, Direction.center, Direction.right],
-    ): void {
+    }): void {
         for (const d of order) {
             let subtree: LinkedBinaryTree<T> | undefined;
             switch (d) {
@@ -49,25 +70,12 @@ class LinkedBinaryTree<T> implements BinaryTree<T> {
                     subtree = this.right;
                     break;
             }
-            subtree?.traverseDeep(action, order);
+            subtree?.traverseDeep({ action, order });
         }
     }
+
+    // traverseDeep(action: Action<T>): void;
+    // {
+    //     this.travarseDeep({ action })
+    // }
 }
-
-const root = new LinkedBinaryTree(1);
-
-root.left = new LinkedBinaryTree(2);
-root.right = new LinkedBinaryTree(3);
-
-root.left.left = new LinkedBinaryTree(4);
-root.left.right = new LinkedBinaryTree(5);
-
-root.right.left = new LinkedBinaryTree(6);
-root.right.right = new LinkedBinaryTree(7);
-
-const result: number[] = [];
-
-root.traverseDeep(it => result.push(it));
-// root.traverseDeep(console.log);
-
-console.log(result);
