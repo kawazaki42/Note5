@@ -4,6 +4,11 @@ public enum Direction {
     case rightChild
 }
 
+protocol BinaryTree {
+
+    
+}
+
 public typealias TraverseOrder = (Direction, Direction, Direction)
 
 // public struct TraverseOrder {

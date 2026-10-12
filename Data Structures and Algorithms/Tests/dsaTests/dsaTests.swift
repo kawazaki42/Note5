@@ -1,8 +1,8 @@
 import Testing
 @testable import BinaryTree
-import BinarySearchTree
+// import BinarySearchTree
 
-typealias Node = BinaryTree.LinkedBinaryTreeNode
+typealias Node = LinkedBinaryTreeNode
 
 // @Test func example() async throws {
 //     // Write your test here and use APIs like `#expect(...)` to check expected conditions.
