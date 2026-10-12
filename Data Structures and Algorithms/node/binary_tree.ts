@@ -15,7 +15,7 @@ const DEFAULT_ORDER: DeepTraverseOrder = [
 abstract class BinaryTree<T> {
     abstract traverseDeep(options: {
         order: DeepTraverseOrder,
-        action: (element: T) => void,
+        action: Action<T>,
     }): void;
 
     flattenDeep(order: DeepTraverseOrder = DEFAULT_ORDER): T[] {
@@ -50,12 +50,9 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
     //     }
     // }
 
-    // traverseDeep(action: Action<T>): void;
-    // travarseDeep()
-
     traverseDeep({order = DEFAULT_ORDER, action}: {
         order?: DeepTraverseOrder,
-        action: (element: T) => void,
+        action: Action<T>,
     }): void {
         for (const d of order) {
             let subtree: LinkedBinaryTree<T> | undefined;
@@ -73,9 +70,4 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
             subtree?.traverseDeep({ action, order });
         }
     }
-
-    // traverseDeep(action: Action<T>): void;
-    // {
-    //     this.travarseDeep({ action })
-    // }
 }

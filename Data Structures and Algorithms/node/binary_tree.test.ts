@@ -29,45 +29,30 @@ Deno.test.each([
         label: 'reverse',
         expected: [4, 5, 2, 6, 7, 3, 1],
     },
+    {
+        order: [center, right, left],
+        label: 'right direct',
+        expected: [1, 3, 7, 6, 2, 5, 4],
+    },
+    {
+        order: [right, left, center],
+        label: 'right reverse',
+        expected: [7, 6, 3, 5, 4, 2, 1],
+    },
+    {
+        order: [left, center, right],
+        label: 'symmetric',
+        expected: [4, 2, 5, 1, 6, 3, 7],
+    },
+    {
+        order: [right, center, left],
+        label: 'symmetric right',
+        expected: [7, 3, 6, 1, 5, 2, 4],
+    },
 ] as {
     order: DeepTraverseOrder,
     label: string,
     expected: number[]
 }[])("deep traverse ($label)", ({ order, expected }) => {
-    // const items: number[] = [];
-    // const expectedCopy = expected;
-
-    // sample().traverseDeep({
-    //     order,
-    //     action: it => items.push(it),
-    // });
-
     assertEquals(sample().flattenDeep(order), expected);
 });
-
-// Deno.test({
-//     name: "deep traverse (root first)",
-//     fn() {
-//         const result: number[] = [];
-//         sample().traverseDeep({
-//             action: it => result.push(it),
-//         });
-
-//         assertEquals(result, [1, 2, 4, 5, 3, 6, 7]);
-//     }
-// });
-
-// Deno.test({
-//     name: "deep traverse (children first)",
-//     fn() {
-//         const { center, left, right } = Direction;
-
-//         const result: number[] = [];
-//         sample().traverseDeep({
-//             order: [left, right, center],
-//             action: it => result.push(it),
-//         });
-
-//         assertEquals(result, [4, 5, 2, 6, 7, 3, 1]);
-//     }
-// });
