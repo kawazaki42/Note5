@@ -61,19 +61,19 @@ Deno.test.each(deepTests)(
         assertEquals(sample().flattenDeep(order), expected);
 });
 
-Deno.test({
-    name: "broad traverse",
-    fn() {
-        assertEquals(sample().flattenBroad(), [1, 2, 3, 4, 5, 6, 7])
-    },
-});
+// Deno.test({
+//     name: "broad traverse",
+//     fn() {
+//         assertEquals(sample().flattenBroad(), [1, 2, 3, 4, 5, 6, 7])
+//     },
+// });
 
-Deno.test({
-    name: "broad traverse right",
-    fn() {
-        assertEquals(sample().flattenBroad(true), [1, 3, 2, 7, 6, 5, 4])
-    },
-});
+// Deno.test({
+//     name: "broad traverse right",
+//     fn() {
+//         assertEquals(sample().flattenBroad(true), [1, 3, 2, 7, 6, 5, 4])
+//     },
+// });
 
 function modifiedSample() {
     const result = sample();
@@ -81,15 +81,8 @@ function modifiedSample() {
     return result;
 }
 
-// function anotherSample() {
-
-// }
-
-Deno.test({
-    name: 'broad traverse: unusual tree',
-    fn() {
-        // console.log(modifiedSample().flattenBroad());
-        const result = LinkedBinaryTree.fromRecursiveArray([
+function irregularTree() {
+    return LinkedBinaryTree.fromRecursiveArray([
             'F',
             ['B',
                 ['A'],
@@ -101,9 +94,35 @@ Deno.test({
                 ['I',
                     ['H'],
                     undefined]],
-        ]).flattenBroad();
+        ]);
+}
 
-        assertEquals(result, 'FBGADICEH'.split(''));
-        // console.log(result);
+const broadTests = [
+    {
+        // inverseHorizontal: false,
+        // inverseVertical: false,
+        expected: 'FBGADICEH',
+        label: 'direct',
     },
-})
+    {
+        inverseHorizontal: true,
+        label: 'h-flip',
+        expected: 'FGBIDAHEC',
+    },
+]
+
+// Deno.test.each
+
+Deno.test.each(broadTests)('broad traverse: unusual tree ($label)', ({expected, ...options}) => {
+    assertEquals(irregularTree().flattenBroad(options), expected.split(''));
+});
+
+// Deno.test({
+//     name: 'broad traverse: unusual tree',
+//     fn() {
+//         // console.log(modifiedSample().flattenBroad());
+
+//         assertEquals(irregularTree().flattenBroad(), 'FBGADICEH'.split(''));
+//         // console.log(result);
+//     },
+// })

@@ -21,6 +21,7 @@ abstract class BinaryTree<T> {
     abstract traverseBroad(options: {
         action: Action<T>,
         inverseHorizontal: boolean,
+        inverseVertical: boolean,
     }): void;
 
     flattenDeep(order: DeepTraverseOrder = DEFAULT_ORDER): T[] {
@@ -31,11 +32,17 @@ abstract class BinaryTree<T> {
         return result;
     }
 
-    flattenBroad(inverseHorizontal: boolean = false): T[] {
+    flattenBroad({
+        inverseHorizontal = false,
+        inverseVertical = false,
+    }: {
+        inverseHorizontal?: boolean,
+        inverseVertical?: boolean,
+    }): T[] {
         const result: T[] = [];
         const action = (it: T) => result.push(it);
 
-        this.traverseBroad({ action, inverseHorizontal });
+        this.traverseBroad({ action, inverseHorizontal, inverseVertical });
         return result
     }
 }
@@ -77,7 +84,7 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
         return new LinkedBinaryTree(data, left_, right_);
     }
 
-    traverseDeep({order = DEFAULT_ORDER, action}: {
+    override traverseDeep({order = DEFAULT_ORDER, action}: {
         order?: DeepTraverseOrder,
         action: Action<T>,
     }): void {
@@ -115,6 +122,27 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
         });
     }
 
+    // override flattenBroad(inverseHorizontal?: boolean): T[] {
+    //     const result = [this];
+
+
+
+    //     // result.push(this.data);
+
+    //     // result.push(this.left?.data);
+    //     // result.push(this.right?.data);
+
+    //     // result.push(this.left?.left?.data);
+    //     // result.push(this.left?.right?.data);
+
+    //     // result.push(this.right?.left?.data);
+    //     // result.push(this.right?.right?.data);
+
+    //     result
+    // }
+
+    // private traverseBottomUp(action, inverseHorizontal)
+
     traverseBroad({
         action,
         inverseHorizontal = false,
@@ -124,13 +152,51 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
         inverseHorizontal: boolean,
         inverseVertical: boolean,
     }): void {
-        // if (inverseVertical) {
+        if (inverseVertical) {
 
-        // }
+        }
 
-        // Global root (head)
-        action(this.data);
+        // // Global root (head)
+        // action(this.data);
 
-        this.traverseBroadHeadless(action, inverseHorizontal);
+        // this.traverseBroadHeadless(action, inverseHorizontal);
+
+        let order: LinkedBinaryTree<T>[] = [this];
+        let more: LinkedBinaryTree<T>[] = [];
+
+        // const next = order.shift();
+        // if (next)
+        //     action(next.data);
+
+        while (order.length) {
+            console.log(order.map(it => it.data));
+
+            for (const node of order) {
+                const children = inverseHorizontal
+                    ? [node.right, node.left]
+                    : [node.left, node.right];
+
+                children.forEach(it => it ? more.push(it) : undefined);
+
+                // if (node.left)
+                //     more.push(node.left);
+
+                // if (node.right)
+                //     more.push(node.right);
+
+                action(node.data);
+            }
+
+            order = more;
+            more = [];
+
+            // const more = [];
+
+            // order.push(...more);
+        }
+
+        // let more = [];
+
+        // order.forEach(it => it.left ? order.push(it.left));
     }
 }
