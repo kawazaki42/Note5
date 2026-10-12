@@ -19,8 +19,8 @@ function sample() {
 const { center, left, right } = Direction;
 
 const deepTests: {
-    order: DeepTraverseOrder,
     label: string,
+    order: DeepTraverseOrder,
     expected: number[]
 }[] = [
     {
@@ -74,3 +74,36 @@ Deno.test({
         assertEquals(sample().flattenBroad(true), [1, 3, 2, 7, 6, 5, 4])
     },
 });
+
+function modifiedSample() {
+    const result = sample();
+    result.left!.right!.left = new LinkedBinaryTree(8);
+    return result;
+}
+
+// function anotherSample() {
+
+// }
+
+Deno.test({
+    name: 'broad traverse: unusual tree',
+    fn() {
+        // console.log(modifiedSample().flattenBroad());
+        const result = LinkedBinaryTree.fromRecursiveArray([
+            'F',
+            ['B',
+                ['A'],
+                ['D',
+                    ['C'],
+                    ['E']]],
+            ['G',
+                undefined,
+                ['I',
+                    ['H'],
+                    undefined]],
+        ]).flattenBroad();
+
+        assertEquals(result, 'FBGADICEH'.split(''));
+        // console.log(result);
+    },
+})
