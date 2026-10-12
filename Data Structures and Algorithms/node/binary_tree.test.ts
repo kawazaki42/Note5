@@ -99,8 +99,6 @@ function irregularTree() {
 
 const broadTests = [
     {
-        // inverseHorizontal: false,
-        // inverseVertical: false,
         expected: 'FBGADICEH',
         label: 'direct',
     },
@@ -109,6 +107,17 @@ const broadTests = [
         label: 'h-flip',
         expected: 'FGBIDAHEC',
     },
+    {
+        inverseVertical: true,
+        label: 'v-flip',
+        expected: 'CEHADIBGF',
+    },
+    {
+        inverseHorizontal: true,
+        inverseVertical: true,
+        label: 'hv-flip',
+        expected: 'HECIDAGBF'
+    }
 ]
 
 // Deno.test.each

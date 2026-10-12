@@ -143,7 +143,15 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
 
     // private traverseBottomUp(action, inverseHorizontal)
 
-    traverseBroad({
+    override flattenBroad({ inverseHorizontal, inverseVertical, }: { inverseHorizontal?: boolean; inverseVertical?: boolean; }): T[] {
+        if (inverseVertical) {
+            return this.flattenBroad({ inverseHorizontal: !inverseHorizontal }).reverse();
+        } else {
+            return super.flattenBroad({ inverseVertical, inverseHorizontal });
+        }
+    }
+
+    override traverseBroad({
         action,
         inverseHorizontal = false,
         inverseVertical = false,
@@ -153,7 +161,17 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
         inverseVertical: boolean,
     }): void {
         if (inverseVertical) {
+            // O(n) space algorithm
 
+            // const inverseHorizontal: boolean = !inverseHorizontal;
+            // this
+            //     .flattenBroad({
+            //         inverseHorizontal: !inverseHorizontal,
+            //     })
+            //     .reverse()
+            return this
+                .flattenBroad({ inverseVertical })
+                .forEach(action);
         }
 
         // // Global root (head)
@@ -169,7 +187,7 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
         //     action(next.data);
 
         while (order.length) {
-            console.log(order.map(it => it.data));
+            // console.log(order.map(it => it.data));
 
             for (const node of order) {
                 const children = inverseHorizontal
