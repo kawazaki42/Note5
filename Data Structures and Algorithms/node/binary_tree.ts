@@ -38,39 +38,15 @@ abstract class BinaryTree<T> {
         this.traverseBroad({ action, inverseHorizontal });
         return result
     }
-
-    // flatten(options: {
-    //     deep: true,
-    //     order: DeepTraverseOrder,
-    // } | {
-    //     deep: false,
-    //     inverseHorizontal: boolean,
-    // }): T[] {
-    //     const result: T[] = [];
-    //     const action = (it: T) => result.push(it);
-
-    //     // switch (options.deep) {
-    //     //     case true: {
-    //     //         const { order } = options
-    //     //     }
-
-    //     // }
-
-    //     // options.deep ??= true;
-
-    //     if (options.deep) {
-    //         const { order } = options;
-    //         this.traverseDeep({ action, order });
-    //     } else {
-    //         const { inverseHorizontal } = options;
-    //         this.traverseBroad({ action, inverseHorizontal });
-    //     }
-
-    //     return result;
-    // }
 }
 
-type Action<T> = (element: T) => void
+type Action<T> = (element: T) => void;
+
+type RecursiveArray<T> = [
+    T,
+    RecursiveArray<T> | undefined,
+    RecursiveArray<T> | undefined,
+] | [T];
 
 export class LinkedBinaryTree<T> extends BinaryTree<T> {
     data: T;
@@ -94,6 +70,12 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
             
     //     }
     // }
+
+    static fromRecursiveArray<T>([data, left, right]: RecursiveArray<T>): LinkedBinaryTree<T> {
+        const left_ = left ? LinkedBinaryTree.fromRecursiveArray(left) : undefined;
+        const right_ = right ? LinkedBinaryTree.fromRecursiveArray(right) : undefined;
+        return new LinkedBinaryTree(data, left_, right_);
+    }
 
     traverseDeep({order = DEFAULT_ORDER, action}: {
         order?: DeepTraverseOrder,
@@ -136,10 +118,16 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
     traverseBroad({
         action,
         inverseHorizontal = false,
+        inverseVertical = false,
     }: {
         action: Action<T>,
         inverseHorizontal: boolean,
+        inverseVertical: boolean,
     }): void {
+        // if (inverseVertical) {
+
+        // }
+
         // Global root (head)
         action(this.data);
 
