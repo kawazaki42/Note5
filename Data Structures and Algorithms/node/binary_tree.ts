@@ -6,12 +6,6 @@ export enum Direction {
 
 export type DeepTraverseOrder = [Direction, Direction, Direction];
 
-// const DEFAULT_ORDER: DeepTraverseOrder = [
-//     Direction.center,
-//     Direction.left,
-//     Direction.right,
-// ];
-
 export interface DeepTraverseOptions {
     inverseHorizontal?: boolean,
     putParentAt?: 0 | 1 | 2,
@@ -34,12 +28,10 @@ abstract class BinaryTree<T> {
         inverseVertical: boolean,
     }): void;
 
-    // flattenDeep(order: DeepTraverseOrder = DEFAULT_ORDER): T[] {
     flattenDeep(options: DeepTraverseOptions): T[] {
         const result: T[] = [];
         const action = (it: T) => result.push(it);
 
-        // this.traverseDeep({ order, action });
         this.traverseDeep({ ...options, action });
         return result;
     }
@@ -90,10 +82,6 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
         return new LinkedBinaryTree(data, left_, right_);
     }
 
-    // override traverseDeep({order = DEFAULT_ORDER, action}: {
-    //     order?: DeepTraverseOrder,
-    //     action: Action<T>,
-    // }): void {
     override traverseDeep({
         inverseHorizontal,
         putParentAt,
@@ -125,23 +113,6 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
         }
     }
 
-    private traverseBroadHeadless(
-        action: Action<T>,
-        inverseHorizontal: boolean,
-    ) {
-        const subtrees = inverseHorizontal
-            ? [this.right, this.left]
-            : [this.left, this.right];
-
-        // Subtree roots (heads) first
-        subtrees.forEach(it => it ? action(it.data) : undefined);
-
-        // Next, subtrees' subtrees
-        subtrees.forEach(it => {
-            it?.traverseBroadHeadless(action, inverseHorizontal)
-        });
-    }
-
     override flattenBroad({ inverseHorizontal, inverseVertical, }: { inverseHorizontal?: boolean; inverseVertical?: boolean; }): T[] {
         if (inverseVertical) {
             return this.flattenBroad({ inverseHorizontal: !inverseHorizontal }).reverse();
@@ -161,29 +132,13 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
     }): void {
         if (inverseVertical) {
             // O(n) space algorithm
-
-            // const inverseHorizontal: boolean = !inverseHorizontal;
-            // this
-            //     .flattenBroad({
-            //         inverseHorizontal: !inverseHorizontal,
-            //     })
-            //     .reverse()
             return this
                 .flattenBroad({ inverseVertical })
                 .forEach(action);
         }
 
-        // // Global root (head)
-        // action(this.data);
-
-        // this.traverseBroadHeadless(action, inverseHorizontal);
-
         let order: LinkedBinaryTree<T>[] = [this];
         let more: LinkedBinaryTree<T>[] = [];
-
-        // const next = order.shift();
-        // if (next)
-        //     action(next.data);
 
         while (order.length) {
             // console.log(order.map(it => it.data));
@@ -195,25 +150,11 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
 
                 children.forEach(it => it ? more.push(it) : undefined);
 
-                // if (node.left)
-                //     more.push(node.left);
-
-                // if (node.right)
-                //     more.push(node.right);
-
                 action(node.data);
             }
 
             order = more;
             more = [];
-
-            // const more = [];
-
-            // order.push(...more);
         }
-
-        // let more = [];
-
-        // order.forEach(it => it.left ? order.push(it.left));
     }
 }
