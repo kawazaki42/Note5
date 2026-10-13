@@ -1,22 +1,9 @@
-export enum Direction {
-    center,
-    left,
-    right,
-}
-
-export type DeepTraverseOrder = [Direction, Direction, Direction];
-
 export interface DeepTraverseOptions {
     inverseHorizontal?: boolean,
     putParentAt?: 0 | 1 | 2,
 }
 
 abstract class BinaryTree<T> {
-    // abstract traverseDeep(options: {
-    //     order: DeepTraverseOrder,
-    //     action: Action<T>,
-    // }): void;
-
     abstract traverseDeep(
         options: DeepTraverseOptions & {
             action: Action<T>,
@@ -89,27 +76,20 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
     }: DeepTraverseOptions & {
         action: Action<T>,
     }): void {
-        const order = [Direction.left, Direction.right];
+        const subtrees = [this.left, this.right];
 
         if (inverseHorizontal)
-            order.reverse();
+            subtrees.reverse();
 
-        order.splice(putParentAt ?? 0, 0, Direction.center);
+        subtrees.splice(putParentAt ?? 0, 0, this);
 
-        for (const d of order) {
-            let subtree: LinkedBinaryTree<T> | undefined;
-            switch (d) {
-                case Direction.center:
-                    action(this.data);
-                    break;
-                case Direction.left:
-                    subtree = this.left;
-                    break;
-                case Direction.right:
-                    subtree = this.right;
-                    break;
+        for (const sub of subtrees) {
+            if (sub === this) {
+                action(this.data);
+                continue;
             }
-            subtree?.traverseDeep({ action, inverseHorizontal, putParentAt });
+
+            sub?.traverseDeep({ action, inverseHorizontal, putParentAt });
         }
     }
 
