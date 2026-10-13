@@ -6,16 +6,26 @@ export enum Direction {
 
 export type DeepTraverseOrder = [Direction, Direction, Direction];
 
-const DEFAULT_ORDER: DeepTraverseOrder = [
-    Direction.center,
-    Direction.left,
-    Direction.right,
-]
+// const DEFAULT_ORDER: DeepTraverseOrder = [
+//     Direction.center,
+//     Direction.left,
+//     Direction.right,
+// ];
+
+export interface DeepTraverseOptions {
+    inverseHorizontal?: boolean,
+    putParentAt?: 0 | 1 | 2,
+}
 
 abstract class BinaryTree<T> {
-    abstract traverseDeep(options: {
-        order: DeepTraverseOrder,
-        action: Action<T>,
+    // abstract traverseDeep(options: {
+    //     order: DeepTraverseOrder,
+    //     action: Action<T>,
+    // }): void;
+
+    abstract traverseDeep(
+        options: DeepTraverseOptions & {
+            action: Action<T>,
     }): void;
 
     abstract traverseBroad(options: {
@@ -24,11 +34,13 @@ abstract class BinaryTree<T> {
         inverseVertical: boolean,
     }): void;
 
-    flattenDeep(order: DeepTraverseOrder = DEFAULT_ORDER): T[] {
+    // flattenDeep(order: DeepTraverseOrder = DEFAULT_ORDER): T[] {
+    flattenDeep(options: DeepTraverseOptions): T[] {
         const result: T[] = [];
         const action = (it: T) => result.push(it);
 
-        this.traverseDeep({ order, action });
+        // this.traverseDeep({ order, action });
+        this.traverseDeep({ ...options, action });
         return result;
     }
 
@@ -72,22 +84,30 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
         this.right = right;
     }
 
-    // static fromBredth<T>(array: T[]) {
-    //     for (const element of array) {
-            
-    //     }
-    // }
-
     static fromRecursiveArray<T>([data, left, right]: RecursiveArray<T>): LinkedBinaryTree<T> {
         const left_ = left ? LinkedBinaryTree.fromRecursiveArray(left) : undefined;
         const right_ = right ? LinkedBinaryTree.fromRecursiveArray(right) : undefined;
         return new LinkedBinaryTree(data, left_, right_);
     }
 
-    override traverseDeep({order = DEFAULT_ORDER, action}: {
-        order?: DeepTraverseOrder,
+    // override traverseDeep({order = DEFAULT_ORDER, action}: {
+    //     order?: DeepTraverseOrder,
+    //     action: Action<T>,
+    // }): void {
+    override traverseDeep({
+        inverseHorizontal,
+        putParentAt,
+        action,
+    }: DeepTraverseOptions & {
         action: Action<T>,
     }): void {
+        const order = [Direction.left, Direction.right];
+
+        if (inverseHorizontal)
+            order.reverse();
+
+        order.splice(putParentAt ?? 0, 0, Direction.center);
+
         for (const d of order) {
             let subtree: LinkedBinaryTree<T> | undefined;
             switch (d) {
@@ -101,7 +121,7 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
                     subtree = this.right;
                     break;
             }
-            subtree?.traverseDeep({ action, order });
+            subtree?.traverseDeep({ action, inverseHorizontal, putParentAt });
         }
     }
 
@@ -121,27 +141,6 @@ export class LinkedBinaryTree<T> extends BinaryTree<T> {
             it?.traverseBroadHeadless(action, inverseHorizontal)
         });
     }
-
-    // override flattenBroad(inverseHorizontal?: boolean): T[] {
-    //     const result = [this];
-
-
-
-    //     // result.push(this.data);
-
-    //     // result.push(this.left?.data);
-    //     // result.push(this.right?.data);
-
-    //     // result.push(this.left?.left?.data);
-    //     // result.push(this.left?.right?.data);
-
-    //     // result.push(this.right?.left?.data);
-    //     // result.push(this.right?.right?.data);
-
-    //     result
-    // }
-
-    // private traverseBottomUp(action, inverseHorizontal)
 
     override flattenBroad({ inverseHorizontal, inverseVertical, }: { inverseHorizontal?: boolean; inverseVertical?: boolean; }): T[] {
         if (inverseVertical) {
