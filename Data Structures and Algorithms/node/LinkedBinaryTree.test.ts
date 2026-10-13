@@ -1,5 +1,6 @@
-import { LinkedBinaryTree, DeepTraverseOptions } from "./binary_tree.ts";
-import { assertEquals } from "@std/assert"
+import LinkedBinaryTree from "./LinkedBinaryTree.ts";
+import { DeepTraverseOptions } from "./BinaryTree.ts";
+import { assertEquals } from "@std/assert";
 
 function sample() {
     const root = new LinkedBinaryTree(1);
