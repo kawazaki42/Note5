@@ -1,5 +1,8 @@
-use rand::{self, Fill, distr::uniform::SampleRange};
-use std::{eprintln, fs::File, io::Write};
+use rand;
+use std::eprintln;
+// use std::eprintln;
+use std::fs::File;
+use std::io::{Read, Seek, SeekFrom, Write};
 
 // #[derive(Debug)]
 // struct Element(u16);
@@ -12,6 +15,8 @@ type Element = u16;
 type Line = [Element; LINE_SIZE];
 type Page = [Line; PAGE_SIZE];
 type Bank = [Page; BANK_SIZE];
+
+const FILENAME: &str = "Pagefile.txt";
 
 trait Random {
     fn random() -> Self;
@@ -30,29 +35,9 @@ impl<T: Random, const S: usize> Random for [T; S] {
     }
 }
 
-// impl Random for Line {
-//     fn random() -> Self {
-//         std::array::from_fn(|_| Element::random())
-//     }
-// }
-
-// impl Random for Page {
-//     fn random() -> Self {
-//         std::array::from_fn(|_| )
-//     }
-// }
-
-// impl Fill for Element {
-//     fn fill_slice<R: rand::prelude::Rng + ?Sized>(this: &mut [Self], rng: &mut R) {
-
-//     }
-// }
-
-// impl SampleRange
-
-// type Element = u16;
-
 trait Repr {
+    // const SEPARATOR: &str;
+
     fn repr(&self) -> String;
 }
 
@@ -82,27 +67,144 @@ impl Repr for Bank {
     }
 }
 
-// fn repr(this: &Bank) {
+fn init_pagefile() {
+    let mut file = File::create(FILENAME).expect("unable to open file");
+    let data = Bank::random();
 
+    writeln!(file, "{}", data.repr()).expect("unable to write initial memory");
+}
+
+// enum CacheLine {
+//     Empty,
+//     Loaded {
+//         page: usize,
+//         data: Line,
+//     }
 // }
 
+// impl Default for CacheLine {
+//     fn default() -> Self {
+//         Self::Empty
+//     }
+// }
+
+trait Zero {
+    fn zero() -> Self;
+}
+
+impl<T: Zero + Copy, const S: usize> Zero for [T; S] {
+    fn zero() -> Self {
+        [T::zero(); S]
+    }
+}
+
+impl Zero for u16 {
+    fn zero() -> Self {
+        0
+    }
+}
+
+struct Cache {
+    // let tags = [Option::<usize>::None; PAGE_SIZE];
+    // let cache_body = Page::zero();
+    tags: [Option<usize>; PAGE_SIZE],
+    body: [Line; PAGE_SIZE],
+    target: File,
+}
+
+impl Cache {
+    fn for_file(target: File) -> Self {
+        Self {
+            tags: [None; _],
+            body: Page::zero(),
+            target,
+        }
+    }
+}
+
+// impl Default for Cache {
+//     fn default() -> Self {
+//         Self { tags: [None; _], body: Page::zero(), target: () }
+//     }
+// }
+
+impl Cache {
+    fn get(&mut self, page: usize, line: usize, elem: usize) -> (&Element, &Line, bool) {
+        for (cached_line, cached_page) in self.tags.iter().enumerate() {
+            if *cached_page == Some(page) && cached_line == line {
+                let line = &self.body[line];
+                return (&line[elem], line, true);
+            }
+        }
+
+        // File::open(FILENAME)
+        const BYTES_PER_ELEM: usize = 4 + 1; // separator
+        const BYTES_PER_LINE: usize = BYTES_PER_ELEM * LINE_SIZE;
+        let bytes_per_page = BYTES_PER_LINE * PAGE_SIZE + 1; // second newline
+
+        let offset = page * bytes_per_page + line * BYTES_PER_LINE;
+
+        self.target
+            .seek(SeekFrom::Start(offset.try_into().unwrap()))
+            .expect("couldn't navigate inside file");
+
+        let mut buf = [0; BYTES_PER_LINE];
+
+        self.target.read_exact(&mut buf).expect("read error");
+
+        // let mut cursor = &buf;
+
+        // let line = Line::zero();
+
+        // let (this, cursor) = cursor.split_at(4);
+
+        // buf.chunks(BYTES_PER_ELEM).flat_map(|it| &str::);
+        let loaded_line = str::from_utf8(&buf)
+            .expect("encoding error")
+            .split_ascii_whitespace()
+            .map(|it| it.parse())
+            .collect::<Result<Vec<u16>, _>>()
+            .expect("not a number");
+        // .collect<Vec<u16>>()
+
+        // let line = std::array::from_fn(|_| iter.next());
+
+        // let line: &Line = &line[..4];
+
+        // line.
+
+        self.tags[line] = Some(page);
+        self.body[line] = loaded_line.try_into().expect("malformed pagefile");
+
+        let line = &self.body[line];
+        return (&line[elem], line, false);
+
+        // self.target.bytes().find
+    }
+}
+
 fn main() {
-    let mut f = File::create("Memory.txt").expect("unable to open file");
+    init_pagefile();
 
-    // File::
-    // let b = <[u8; 8]>::
-    // rand::fill(&);
-    // let b: Bank = rand::random();
-    let b = Bank::random();
+    // let tags: [Option<Line>] = [None; PAGE_SIZE];
+    // let cache = [CacheLine::default(); PAGE_SIZE];
+    // let cache: [_; PAGE_SIZE] = std::array::from_fn(|_| CacheLine::Empty);
 
-    // println!("{}", b.repr());
-    writeln!(f, "{}", b.repr()).expect("unable to write initial memory");
+    let file = File::open(FILENAME).expect("couldn't open pagefile");
 
+    let mut cache = Cache::for_file(file);
+
+    eprintln!("Enter three integers to get an element: <page> <line> <elem>");
     loop {
         eprint!("> ");
 
         let mut buf = String::new();
+
         std::io::stdin().read_line(&mut buf).expect("i/o error");
+
+        if buf == "exit" {
+            return;
+        }
 
         let words: Vec<&str> = buf.split_whitespace().collect();
 
@@ -118,10 +220,6 @@ fn main() {
             continue;
         };
 
-        // match page.parse() {
-        //     Ok(page @ 0..BANK_SIZE) => (),
-        // }
-
         let Ok(line @ 0..PAGE_SIZE) = line.parse::<usize>() else {
             eprintln!("Invalid line index!");
             eprintln!("Should be integer between 0 and {}", PAGE_SIZE - 1);
@@ -134,6 +232,15 @@ fn main() {
             continue;
         };
 
-        eprintln!("you win");
+        // eprintln!("you win");
+        // if tags.contains(&Some(page)) {
+
+        // }
+
+        let (elem, line, hit) = cache.get(page, line, elem);
+
+        eprintln!("Cache {}", if hit { "hit" } else { "miss" });
+        eprintln!("Read: {}", elem);
+        eprintln!("In line: {:?}", line);
     }
 }
