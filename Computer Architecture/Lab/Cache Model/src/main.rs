@@ -216,9 +216,11 @@ fn main() {
                     continue;
                 };
 
+                let start = std::time::Instant::now();
                 let (elem, line, hit) = cache.get(page, line, elem);
+                let time = start.elapsed();
 
-                eprintln!("Found in cache: {hit}");
+                eprintln!("Found in cache: {hit}; {time:?}");
                 eprintln!(
                     "Read: {elem}",
                     // if hit { "cached" } else { "not found in cache" }
