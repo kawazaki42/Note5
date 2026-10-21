@@ -1,4 +1,5 @@
 use rand;
+use std::eprintln;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
 
@@ -103,7 +104,13 @@ impl Zero for u16 {
 struct Cache {
     // let tags = [Option::<usize>::None; PAGE_SIZE];
     // let cache_body = Page::zero();
+
+    /// Mapping of cache line indices to main memory page indices.
     tags: [Option<usize>; PAGE_SIZE],
+
+    /// Cache lines.
+    /// 
+    /// A cache line with index `lineno` is only valid if `tags[lineno]` is not `None`.
     body: [Line; PAGE_SIZE],
     target: File,
 }
@@ -165,6 +172,7 @@ impl Cache {
 const HELP: &str = "Available commands:
 help
 read <page> <line> <elem>
+stat
 exit";
 
 fn main() {
@@ -191,10 +199,12 @@ fn main() {
 
         match words.next() {
             Some("exit") => return,
+
             Some("help") => {
                 eprintln!("{HELP}");
                 continue;
             }
+
             Some("read" | "r") => {
                 fn invalid_address() {
                     eprintln!("Invalid address!");
@@ -220,14 +230,27 @@ fn main() {
                 let (elem, line, hit) = cache.get(page, line, elem);
                 let time = start.elapsed();
 
-                eprintln!("Found in cache: {hit}; {time:?}");
+                // eprintln!("Found in cache: {hit}");
+                eprintln!("Reading from: {}", if hit { "CACHE" } else { "MAIN MEMORY" });
+                eprintln!("Reading took: {time:?}");
                 eprintln!(
-                    "Read: {elem}",
+                    "Read element: {elem}",
                     // if hit { "cached" } else { "not found in cache" }
                 );
                 eprintln!("In line: {:?}", line);
             }
+
+            Some("stat" | "s") => {
+                // eprintln!("Tags: {:?}", cache.tags);
+                for (i, x) in cache.tags.iter().enumerate() {
+                    let Some(x) = x else { continue };
+
+                    eprintln!("Cache line {i} used for page {x}: {:?}", cache.body[i]);
+                }
+            }
+
             None => {}
+
             Some(c) => {
                 eprintln!("No such command: {c}");
                 continue;
