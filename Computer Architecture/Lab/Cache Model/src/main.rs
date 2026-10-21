@@ -104,12 +104,11 @@ impl Zero for u16 {
 struct Cache {
     // let tags = [Option::<usize>::None; PAGE_SIZE];
     // let cache_body = Page::zero();
-
     /// Mapping of cache line indices to main memory page indices.
     tags: [Option<usize>; PAGE_SIZE],
 
     /// Cache lines.
-    /// 
+    ///
     /// A cache line with index `lineno` is only valid if `tags[lineno]` is not `None`.
     body: [Line; PAGE_SIZE],
     target: File,
@@ -166,6 +165,19 @@ impl Cache {
 
         let line = &self.body[line];
         return (&line[elem], line, false);
+    }
+
+    fn stat(&self) -> String {
+        let mut result = String::new();
+
+        for (i, x) in self.tags.iter().enumerate() {
+            let Some(x) = x else { continue };
+
+            // eprintln!();
+            result += &format!("Cache line {i} used for page {x}: {:?}\n", self.body[i]);
+        }
+
+        result
     }
 }
 
@@ -231,7 +243,10 @@ fn main() {
                 let time = start.elapsed();
 
                 // eprintln!("Found in cache: {hit}");
-                eprintln!("Reading from: {}", if hit { "CACHE" } else { "MAIN MEMORY" });
+                eprintln!(
+                    "Reading from: {}",
+                    if hit { "CACHE" } else { "MAIN MEMORY" }
+                );
                 eprintln!("Reading took: {time:?}");
                 eprintln!(
                     "Read element: {elem}",
@@ -242,11 +257,7 @@ fn main() {
 
             Some("stat" | "s") => {
                 // eprintln!("Tags: {:?}", cache.tags);
-                for (i, x) in cache.tags.iter().enumerate() {
-                    let Some(x) = x else { continue };
-
-                    eprintln!("Cache line {i} used for page {x}: {:?}", cache.body[i]);
-                }
+                eprintln!("{}", cache.stat())
             }
 
             None => {}
