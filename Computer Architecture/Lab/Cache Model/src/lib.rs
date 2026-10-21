@@ -146,7 +146,7 @@ impl Cache {
         self.body[line][elem] = value;
     }
 
-    fn unload(&mut self, line: usize) {
+    pub fn unload(&mut self, line: usize) {
         // self.tags[line] = None;
         let Some(page) = self.tags[line].take() else {
             return;

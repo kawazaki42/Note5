@@ -1,4 +1,3 @@
-// use rand;
 use std::path::Path;
 
 use cache_model::rand::create_random_pagefile;
@@ -11,6 +10,7 @@ const HELP: &str = "Available commands:
 help
 read <page> <line> <elem>
 write <page> <line> <elem> <new_value>
+unload <cache_line>
 stat
 exit";
 
@@ -52,11 +52,11 @@ fn read<'a>(words: impl Iterator<Item = &'a str>, cache: &mut Cache) -> bool {
     true
 }
 
-fn write<'a>(words: impl Iterator<Item = &'a str>, cache: &mut Cache) -> bool {
-    fn invalid_arguments() {
-        eprintln!("Invalid arguments");
-    }
+fn invalid_arguments() {
+    eprintln!("Invalid arguments");
+}
 
+fn write<'a>(words: impl Iterator<Item = &'a str>, cache: &mut Cache) -> bool {
     let Ok(args): Result<[&str; 4], _> = words.collect::<Vec<_>>().try_into() else {
         invalid_arguments();
         // continue;
@@ -81,6 +81,22 @@ fn write<'a>(words: impl Iterator<Item = &'a str>, cache: &mut Cache) -> bool {
     };
 
     cache.write(page, line, elem, value);
+
+    true
+}
+
+fn unload<'a>(words: impl Iterator<Item = &'a str>, cache: &mut Cache) -> bool {
+    let Ok(args): Result<[&str; 1], _> = words.collect::<Vec<_>>().try_into() else {
+        invalid_arguments();
+        return false;
+    };
+
+    let Ok(line @ 0..PAGE_SIZE) = args[0].parse() else {
+        invalid_arguments();
+        return false;
+    };
+
+    cache.unload(line);
 
     true
 }
@@ -121,6 +137,12 @@ fn main() {
 
             Some("write" | "w") => {
                 if !write(words, &mut cache) {
+                    continue;
+                }
+            }
+
+            Some("unload" | "u") => {
+                if !unload(words, &mut cache) {
                     continue;
                 }
             }
