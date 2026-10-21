@@ -42,7 +42,7 @@ trait Repr {
 
 impl Repr for Element {
     fn repr(&self) -> String {
-        format!("{self}")
+        format!("{self:04}")
     }
 }
 
@@ -131,11 +131,12 @@ impl Cache {
 // }
 
 impl Cache {
-    fn get(&mut self, page: usize, line: usize, elem: usize) -> (&Element, &Line, bool) {
+    fn maybe_load(&mut self, page: usize, line: usize) -> bool {
         for (cached_line, cached_page) in self.tags.iter().enumerate() {
             if *cached_page == Some(page) && cached_line == line {
-                let line = &self.body[line];
-                return (&line[elem], line, true);
+                // let line = &self.body[line];
+                // return (&line[elem], line, true);
+                return false;
             }
         }
 
@@ -163,8 +164,24 @@ impl Cache {
         self.tags[line] = Some(page);
         self.body[line] = loaded_line.try_into().expect("malformed pagefile");
 
+        true
+    }
+
+    fn get(&mut self, page: usize, line: usize, elem: usize) -> (&Element, &Line, bool) {
+        let is_new = self.maybe_load(page, line);
+
         let line = &self.body[line];
-        return (&line[elem], line, false);
+
+        (&line[elem], line, !is_new)
+
+        // let line = &self.body[line];
+        // return (&line[elem], line, false);
+    }
+
+    fn write(&mut self, page: usize, line: usize, elem: usize, value: Element) {
+        self.maybe_load(page, line);
+
+        self.body[line][elem] = value;
     }
 
     fn stat(&self) -> String {
@@ -184,6 +201,7 @@ impl Cache {
 const HELP: &str = "Available commands:
 help
 read <page> <line> <elem>
+write <page> <line> <elem> <new_value>
 stat
 exit";
 
@@ -253,6 +271,34 @@ fn main() {
                     // if hit { "cached" } else { "not found in cache" }
                 );
                 eprintln!("In line: {:?}", line);
+            }
+
+            Some("write" | "w") => {
+                fn invalid_arguments() {
+                    eprintln!("Invalid arguments");
+                }
+
+                let Ok(args): Result<[&str; 4], _> = words.collect::<Vec<_>>().try_into() else {
+                    invalid_arguments();
+                    continue;
+                };
+
+                let (
+                    Ok(page @ 0..BANK_SIZE),
+                    Ok(line @ 0..PAGE_SIZE),
+                    Ok(elem @ 0..PAGE_SIZE),
+                    Ok(value @ 1000..=9999),
+                ) = (
+                    args[0].parse(),
+                    args[1].parse(),
+                    args[2].parse(),
+                    args[3].parse::<Element>(),
+                ) else {
+                    invalid_arguments();
+                    continue;
+                };
+
+                cache.write(page, line, elem, value);
             }
 
             Some("stat" | "s") => {
