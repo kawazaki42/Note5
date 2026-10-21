@@ -1,163 +1,150 @@
+use std::io::Write;
 use std::path::Path;
 
+use cache_model::Cache;
 use cache_model::rand::create_random_pagefile;
 use cache_model::{BANK_SIZE, LINE_SIZE, PAGE_SIZE};
-use cache_model::{Cache, Element};
+
+use clap::Parser;
+use clap::Subcommand;
+
+#[derive(Parser)]
+#[command(multicall = true)]
+struct Cli {
+    #[command(subcommand)]
+    command: Command,
+}
+
+#[derive(Subcommand)]
+enum Command {
+    /// Read a memory address
+    #[command(visible_alias = "r")]
+    Read {
+        page: usize,
+        line: usize,
+        elem: usize,
+    },
+
+    /// Write to cache
+    #[command(visible_alias = "w")]
+    Write {
+        page: usize,
+        line: usize,
+        elem: usize,
+        new_value: u16,
+    },
+
+    /// Unload a cache line (cause main memory write)
+    #[command(visible_alias = "u")]
+    Unload {
+        cache_line: usize,
+    },
+
+    /// Show cache status
+    #[command(visible_alias = "s")]
+    Stat,
+
+    Exit,
+}
 
 const FILENAME: &str = "Pagefile.txt";
 
-const HELP: &str = "Available commands:
-help
-read <page> <line> <elem>
-write <page> <line> <elem> <new_value>
-unload <cache_line>
-stat
-exit";
+fn main() -> Result<(), String> {
+    let path = Path::new(FILENAME);
 
-fn read<'a>(words: impl Iterator<Item = &'a str>, cache: &mut Cache) -> bool {
-    fn invalid_address() {
-        eprintln!("Invalid address!");
-        eprintln!("Should be: <page> <line> <elem>");
-    }
+    create_random_pagefile(path);
 
-    let Ok(address): Result<[&str; 3], _> = words.collect::<Vec<_>>().try_into() else {
-        invalid_address();
-        // continue;
-        return false;
-    };
+    let mut cache = Cache::for_file(path);
 
-    let [
-        Ok(page @ 0..BANK_SIZE),
-        Ok(line @ 0..PAGE_SIZE),
-        Ok(elem @ 0..LINE_SIZE),
-    ] = address.map(|it| it.parse())
-    else {
-        invalid_address();
-        // continue;
-        return false;
-    };
-
-    let start = std::time::Instant::now();
-    let (elem, line, hit) = cache.get(page, line, elem);
-    let time = start.elapsed();
-
-    eprintln!(
-        "Reading from: {}",
-        if hit { "CACHE" } else { "MAIN MEMORY" }
-    );
-    eprintln!("Reading took: {time:?}");
-    eprintln!("Read element: {elem}",);
-    eprintln!("In line: {:?}", line);
-
-    true
-}
-
-fn invalid_arguments() {
-    eprintln!("Invalid arguments");
-}
-
-fn write<'a>(words: impl Iterator<Item = &'a str>, cache: &mut Cache) -> bool {
-    let Ok(args): Result<[&str; 4], _> = words.collect::<Vec<_>>().try_into() else {
-        invalid_arguments();
-        // continue;
-        return false;
-    };
-
-    let (
-        Ok(page @ 0..BANK_SIZE),
-        Ok(line @ 0..PAGE_SIZE),
-        Ok(elem @ 0..PAGE_SIZE),
-        Ok(value @ 1000..=9999),
-    ) = (
-        args[0].parse(),
-        args[1].parse(),
-        args[2].parse(),
-        args[3].parse::<Element>(),
-    )
-    else {
-        invalid_arguments();
-        // continue;
-        return false;
-    };
-
-    cache.write(page, line, elem, value);
-
-    true
-}
-
-fn unload<'a>(words: impl Iterator<Item = &'a str>, cache: &mut Cache) -> bool {
-    let Ok(args): Result<[&str; 1], _> = words.collect::<Vec<_>>().try_into() else {
-        invalid_arguments();
-        return false;
-    };
-
-    let Ok(line @ 0..PAGE_SIZE) = args[0].parse() else {
-        invalid_arguments();
-        return false;
-    };
-
-    cache.unload(line);
-
-    true
-}
-
-fn main() {
-    create_random_pagefile(Path::new(FILENAME));
-
-    let mut cache = Cache::for_file(Path::new(FILENAME));
-
-    eprintln!("{HELP}");
     loop {
-        eprint!("> ");
+        let line = readline()?;
 
-        let mut buf = String::new();
-
-        let bytes_read = std::io::stdin().read_line(&mut buf).expect("i/o error");
-
-        if bytes_read == 0 {
-            eprintln!();
-            return;
-        }
-
-        let mut words = buf.split_whitespace();
-
-        match words.next() {
-            Some("exit") => return,
-
-            Some("help") => {
-                eprintln!("{HELP}");
-                continue;
-            }
-
-            Some("read" | "r") => {
-                if !read(words, &mut cache) {
-                    continue;
+        match respond(&line, &mut cache) {
+            Ok(quit) => {
+                if quit {
+                    break;
                 }
             }
-
-            Some("write" | "w") => {
-                if !write(words, &mut cache) {
-                    continue;
-                }
-            }
-
-            Some("unload" | "u") => {
-                if !unload(words, &mut cache) {
-                    continue;
-                }
-            }
-
-            Some("stat" | "s") => {
-                // eprintln!("Tags: {:?}", cache.tags);
-                eprintln!("{}", cache.stat())
-            }
-
-            None => {}
-
-            Some(c) => {
-                eprintln!("No such command: {c}");
-                continue;
+            Err(err) => {
+                write!(std::io::stderr(), "{err}").map_err(|e| e.to_string())?;
+                std::io::stderr().flush().map_err(|e| e.to_string())?;
             }
         }
     }
+
+    Ok(())
+}
+
+fn respond(line: &str, cache: &mut Cache) -> Result<bool, String> {
+    if line.is_empty() {
+        eprintln!();
+        return Ok(true);
+    }
+
+    if line.trim().is_empty() {
+        return Ok(false);
+    }
+
+    let args = line.split_whitespace();
+    let cli = Cli::try_parse_from(args).map_err(|e| e.to_string())?;
+
+    match cli.command {
+        Command::Read { page, line, elem } => {
+            validate_address(page, line, elem)?;
+
+            let start = std::time::Instant::now();
+            let (elem, line, hit) = cache.get(page, line, elem);
+            let time = start.elapsed();
+
+            eprintln!(
+                "Reading from: {}",
+                if hit { "CACHE" } else { "MAIN MEMORY" }
+            );
+            eprintln!("Reading took: {time:?}");
+            eprintln!("Read element: {elem}",);
+            eprintln!("In line: {:?}", line);
+        }
+        Command::Write {
+            page,
+            line,
+            elem,
+            new_value,
+        } => {
+            validate_address(page, line, elem)?;
+            if !(1000..=9999).contains(&new_value) {
+                return Err("New value has invalid amount of digits\n".into());
+            }
+            cache.write(page, line, elem, new_value);
+        }
+        Command::Unload { cache_line } => {
+            validate_address(0, cache_line, 0)?;
+            cache.unload(cache_line)
+        }
+        Command::Stat => {
+            eprintln!("{}", cache.stat());
+        }
+        Command::Exit => return Ok(true),
+    }
+
+    Ok(false)
+}
+
+fn validate_address(page: usize, line: usize, elem: usize) -> Result<(), String> {
+    // if !(0..BANK_SIZE).contains(&page) { return Err("".into()); }
+    match (page, line, elem) {
+        (0..BANK_SIZE, 0..PAGE_SIZE, 0..LINE_SIZE) => Ok(()),
+        _ => Err("Invalid address\n".into()),
+    }
+}
+
+fn readline() -> Result<String, String> {
+    write!(std::io::stderr(), "> ").map_err(|e| e.to_string())?;
+    std::io::stderr().flush().map_err(|e| e.to_string())?;
+
+    let mut buffer = String::new();
+    std::io::stdin()
+        .read_line(&mut buffer)
+        .map_err(|e| e.to_string())?;
+
+    Ok(buffer)
 }
