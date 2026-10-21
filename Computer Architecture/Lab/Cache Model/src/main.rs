@@ -2,6 +2,7 @@ use rand;
 use std::eprintln;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
+use std::path::Path;
 
 // #[derive(Debug)]
 // struct Element(u16);
@@ -111,11 +112,21 @@ struct Cache {
     ///
     /// A cache line with index `lineno` is only valid if `tags[lineno]` is not `None`.
     body: [Line; PAGE_SIZE],
+
+    /// The file cached by this struct.
     target: File,
 }
 
 impl Cache {
-    fn for_file(target: File) -> Self {
+    fn for_file(path: &Path) -> Self {
+        let target = File::options()
+            .read(true)
+            .write(true)
+            // .create(true)
+            .truncate(false)
+            .open(path)
+            .expect("couldn't open pagefile");
+
         Self {
             tags: [None; _],
             body: Page::zero(),
@@ -131,6 +142,20 @@ impl Cache {
 // }
 
 impl Cache {
+    const BYTES_PER_ELEM: usize = 4 + 1; // separator
+    const BYTES_PER_LINE: usize = Self::BYTES_PER_ELEM * LINE_SIZE;
+    const BYTES_PER_PAGE: usize = Self::BYTES_PER_LINE * PAGE_SIZE + 1; // second newline
+
+    fn file_location(page: usize, line: usize, elem: usize) -> SeekFrom {
+        let bytes = (page * Self::BYTES_PER_PAGE
+            + line * Self::BYTES_PER_LINE
+            + elem * Self::BYTES_PER_ELEM)
+            .try_into()
+            .unwrap();
+
+        SeekFrom::Start(bytes)
+    }
+
     fn maybe_load(&mut self, page: usize, line: usize) -> bool {
         for (cached_line, cached_page) in self.tags.iter().enumerate() {
             if *cached_page == Some(page) && cached_line == line {
@@ -140,17 +165,15 @@ impl Cache {
             }
         }
 
-        const BYTES_PER_ELEM: usize = 4 + 1; // separator
-        const BYTES_PER_LINE: usize = BYTES_PER_ELEM * LINE_SIZE;
-        let bytes_per_page = BYTES_PER_LINE * PAGE_SIZE + 1; // second newline
-
-        let offset = page * bytes_per_page + line * BYTES_PER_LINE;
+        // let offset = page * bytes_per_page + line * BYTES_PER_LINE;
+        let offset = Self::file_location(page, line, 0);
 
         self.target
-            .seek(SeekFrom::Start(offset.try_into().unwrap()))
+            // .seek(SeekFrom::Start(offset.try_into().unwrap()))
+            .seek(offset)
             .expect("couldn't navigate inside file");
 
-        let mut buf = [0; BYTES_PER_LINE];
+        let mut buf = [0; Self::BYTES_PER_LINE];
 
         self.target.read_exact(&mut buf).expect("read error");
 
@@ -159,23 +182,30 @@ impl Cache {
             .split_ascii_whitespace()
             .map(|it| it.parse())
             .collect::<Result<Vec<u16>, _>>()
-            .expect("not a number");
+            .expect("not a number")
+            .try_into() // [_; _]
+            .expect("malformed pagefile");
+
+        self.unload(line);
 
         self.tags[line] = Some(page);
-        self.body[line] = loaded_line.try_into().expect("malformed pagefile");
+        self.body[line] = loaded_line;
 
         true
     }
 
+    /// # Returns
+    /// - element (member of line)
+    /// - line
+    /// - whether it's found in cache
+    // /
+    // / (element is member of line)
     fn get(&mut self, page: usize, line: usize, elem: usize) -> (&Element, &Line, bool) {
         let is_new = self.maybe_load(page, line);
 
         let line = &self.body[line];
 
         (&line[elem], line, !is_new)
-
-        // let line = &self.body[line];
-        // return (&line[elem], line, false);
     }
 
     fn write(&mut self, page: usize, line: usize, elem: usize, value: Element) {
@@ -184,13 +214,25 @@ impl Cache {
         self.body[line][elem] = value;
     }
 
+    fn unload(&mut self, line: usize) {
+        // self.tags[line] = None;
+        let Some(page) = self.tags[line].take() else {
+            return;
+        };
+
+        self.target
+            .seek(Self::file_location(page, line, 0))
+            .expect("couldn't navigate inside file");
+
+        write!(self.target, "{}", self.body[line].repr()).expect("pagefile write error");
+    }
+
     fn stat(&self) -> String {
         let mut result = String::new();
 
         for (i, x) in self.tags.iter().enumerate() {
             let Some(x) = x else { continue };
 
-            // eprintln!();
             result += &format!("Cache line {i} used for page {x}: {:?}\n", self.body[i]);
         }
 
@@ -208,9 +250,9 @@ exit";
 fn main() {
     init_pagefile();
 
-    let file = File::open(FILENAME).expect("couldn't open pagefile");
+    // let file = File::open(FILENAME).expect("couldn't open pagefile");
 
-    let mut cache = Cache::for_file(file);
+    let mut cache = Cache::for_file(Path::new(FILENAME));
 
     eprintln!("{HELP}");
     loop {
@@ -260,16 +302,12 @@ fn main() {
                 let (elem, line, hit) = cache.get(page, line, elem);
                 let time = start.elapsed();
 
-                // eprintln!("Found in cache: {hit}");
                 eprintln!(
                     "Reading from: {}",
                     if hit { "CACHE" } else { "MAIN MEMORY" }
                 );
                 eprintln!("Reading took: {time:?}");
-                eprintln!(
-                    "Read element: {elem}",
-                    // if hit { "cached" } else { "not found in cache" }
-                );
+                eprintln!("Read element: {elem}",);
                 eprintln!("In line: {:?}", line);
             }
 
@@ -293,7 +331,8 @@ fn main() {
                     args[1].parse(),
                     args[2].parse(),
                     args[3].parse::<Element>(),
-                ) else {
+                )
+                else {
                     invalid_arguments();
                     continue;
                 };
