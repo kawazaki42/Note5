@@ -24,7 +24,33 @@
 
 $ U_1 = R_1 / (R_1 + R_2) U $
 
+#let u = 5
+
+#let r1 = 10
+#let r2 = 980
+
+#let u1 = r1 / (r1 + r2) * u
+#let u2 = r2 / (r1 + r2) * u
+
+$ #calc.round(u1, digits: 6) $
+
 $ U_2 = R_2 / (R_1 + R_2) U $
+
+// #let u2 = 980 / (990) * 5
+
+$ #calc.round(u2, digits: 6) $
+
+#let i1 = u1 / r1
+#let i2 = u2 / r2
+
+$I1 = #i1$, $I_2 = #i2$
+
+// #math.round([1/3], size: 2pt)
+
+// #calc.ro
+
+$ P_1 = I_1 U_1 = #calc.round(i1 * u1, digits: 6) "Вт" $
+$ P_2 = I_2 U_2 = #calc.round(i2 * u2, digits: 6) "Вт" $
 
 Обычно напряжение делителя снимается относительно средней точки и земли
 
