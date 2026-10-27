@@ -8,6 +8,8 @@ use cache_model::{BANK_SIZE, LINE_SIZE, PAGE_SIZE};
 use clap::Parser;
 use clap::Subcommand;
 
+// use rustyline::DefaultEditor
+
 #[derive(Parser)]
 #[command(multicall = true)]
 struct Cli {
@@ -44,6 +46,9 @@ enum Command {
     #[command(visible_alias = "s")]
     Stat,
 
+    // #[command(visible_alias = "h")]
+    // Help,
+
     Exit,
 }
 
@@ -57,7 +62,9 @@ fn main() -> Result<(), String> {
     let mut cache = Cache::for_file(path);
 
     loop {
-        let line = readline()?;
+        // let line = readline()?;
+        let mut rl = rustyline::DefaultEditor::new().map_err(|e| e.to_string())?;
+        let line = rl.readline("> ").map_err(|e| e.to_string())?;
 
         match respond(&line, &mut cache) {
             Ok(quit) => {
@@ -137,14 +144,14 @@ fn validate_address(page: usize, line: usize, elem: usize) -> Result<(), String>
     }
 }
 
-fn readline() -> Result<String, String> {
-    write!(std::io::stderr(), "> ").map_err(|e| e.to_string())?;
-    std::io::stderr().flush().map_err(|e| e.to_string())?;
+// fn readline() -> Result<String, String> {
+//     write!(std::io::stderr(), "> ").map_err(|e| e.to_string())?;
+//     std::io::stderr().flush().map_err(|e| e.to_string())?;
 
-    let mut buffer = String::new();
-    std::io::stdin()
-        .read_line(&mut buffer)
-        .map_err(|e| e.to_string())?;
+//     let mut buffer = String::new();
+//     std::io::stdin()
+//         .read_line(&mut buffer)
+//         .map_err(|e| e.to_string())?;
 
-    Ok(buffer)
-}
+//     Ok(buffer)
+// }
