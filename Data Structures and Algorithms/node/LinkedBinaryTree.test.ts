@@ -49,7 +49,7 @@ const deepTests: (DeepTraverseOptions & {label: string, expected: number[]})[] =
         putParentAt: 1,
         expected: [7, 3, 6, 1, 5, 2, 4],
     },
-]
+];
 
 Deno.test.each(deepTests)(
     "deep traverse ($label)",
