@@ -1,23 +1,25 @@
-// - Hardware Type: 16 bit
-//   - всегда 0x0001 (ethernet)
-// - Protocol Type: 16 bit
-//   - технология сетевого уровня
-//   - 0x0800 (IPv4)
-//   - для ipv6 не попрет!
-//     - 0x86DD
-// - Hardware Address Length: 8 bit
-//   - длина шизического адреса
-//   - ethernet: 0x06 (48 бит)
-// - Protocol Address Length: 8 bit
-//   - 0x04 (длина адреса ipv4)
-// - Operation Code: 16 bit
-//   - request: 0x0001
-//   - reply: 0x0002
-// - Sender Hardware Address: 48 bit
-//   - mac адрес отправителя (source address)
-// - Sender Protocol Address: 32 bit
-// - Target Hardware Address: 48 bit
-// - Target Protocol Address: 32 bit
+= общая форма
+
+- Hardware Type: 16 bit
+  - всегда 0x0001 (ethernet)
+- Protocol Type: 16 bit
+  - технология сетевого уровня
+  - 0x0800 (IPv4)
+  - для ipv6 не попрет!
+    - 0x86DD
+- Hardware Address Length: 8 bit
+  - длина шизического адреса
+  - ethernet: 0x06 (48 бит)
+- Protocol Address Length: 8 bit
+  - 0x04 (длина адреса ipv4)
+- Operation Code: 16 bit
+  - request: 0x0001
+  - reply: 0x0002
+- Sender Hardware Address: 48 bit
+  - mac адрес отправителя (source address)
+- Sender Protocol Address: 32 bit
+- Target Hardware Address: 48 bit
+- Target Protocol Address: 32 bit
 
 = 1
 
@@ -66,3 +68,5 @@
 - crc
 
 = 5
+
+- 0x0001
