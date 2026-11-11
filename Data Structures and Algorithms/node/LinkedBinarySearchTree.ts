@@ -1,44 +1,9 @@
-// import { assert } from "node:console";
-import BinaryTree from "./BinaryTree.ts";
 import LinkedBinaryTree, { LinkedBinaryTreeNode } from "./LinkedBinaryTree.ts";
-
-// class BinarySearchTree<T> {
-//     private raw: BinaryTree<T>
-
-//     constructor(from: BinaryTree<T>) {
-//         this.raw = from
-//     }
-// }
 
 export type Path = (0 | 1)[];
 
-// export type OperationData = {
-//     path: Path,
-// } | null;
-
 export default class LinkedBinarySearchTree<T> extends LinkedBinaryTree<T> {
-    // insert() {
-
-    // }
-
-    // override left?: LinkedBinarySearchTree<T> = undefined;
-    // override right?: LinkedBinarySearchTree<T> = undefined;
-
     insert(elem: T) {
-        // if (elem <= this.data) {
-        //     if (this.left) {
-        //         this.left.insert(elem);
-        //     } else {
-        //         this.left = new LinkedBinarySearchTree(elem);
-        //     }
-        // } else {
-        //     if (this.right) {
-        //         this.right.insert(elem);
-        //     } else {
-        //         this.right = new LinkedBinarySearchTree(elem);
-        //     }
-        // }
-
         const newNode = new LinkedBinaryTreeNode(elem);
 
         if (!this.root) {
@@ -67,22 +32,6 @@ export default class LinkedBinarySearchTree<T> extends LinkedBinaryTree<T> {
         }
     }
 
-    // search(elem: T, _acc: Path = []): Path | null {
-    //     // assert();
-
-    //     if (elem < this.data) {
-    //         _acc.push(0);
-    //         // return this.left?.search(elem, _acc + 1) ?? -1;
-    //         return this.left?.search(elem, _acc) ?? null;
-    //     } else if (elem > this.data) {
-    //         // return this.right?.search(elem, _acc + 1) ?? -1;
-    //         _acc.push(1);
-    //         return this.right?.search(elem, _acc) ?? null;
-    //     }
-
-    //     return _acc;
-    // }
-
     search(elem: T): Path | null {
         const path: (0 | 1)[] = [];
 
@@ -92,10 +41,6 @@ export default class LinkedBinarySearchTree<T> extends LinkedBinaryTree<T> {
         let cursor = this.root;
 
         while (elem !== cursor.data) {
-            // if (elem === cursor.data) {
-            //     return path;
-            // }
-
             if (elem < cursor.data) {
                 path.push(0);
 
@@ -118,40 +63,10 @@ export default class LinkedBinarySearchTree<T> extends LinkedBinaryTree<T> {
         return path;
     }
     
-    // delete(elem: T, _acc: Path = []): Path | null {
-    //     if (elem === this.data) {
-
-    //     }
-
-    //     if (elem < this.data) {
-    //         _acc.push(0);
-    //         return this.left?.delete(elem) ?? null;
-    //     } else if (elem > this.data) {
-    //         _acc.push(1);
-    //         return this.right?.delete(elem) ?? null;
-    //     }
-
-    //     return _acc;
-    // }
-
     private static appendRightRecursively<T>(
         root: LinkedBinaryTreeNode<T>,
         newChild: LinkedBinaryTreeNode<T>,
     ): void {
-        // if (root.right) {
-        //     // return root.right.appendRight(subtree);
-        //     return LinkedBinarySearchTree.appendRightRecursively(root.right, subtree);
-        //     // this.right?.appendRight
-        // } else {
-        //     root.right = subtree;
-        // }
-
-        // if (!root.right) {
-        //     root.right = newChild;
-        // } else {
-        //     return LinkedBinarySearchTree.appendRightRecursively(root.right, newChild);
-        // }
-
         while (root.right) {
             root = root.right;
         }
@@ -178,7 +93,8 @@ export default class LinkedBinarySearchTree<T> extends LinkedBinaryTree<T> {
             return cursor;
         }
 
-        // if (elem === cursor.data) {
+        // if (elem === cursor.data)
+
         if (!cursor.left)
             return cursor.right;
 
@@ -187,19 +103,17 @@ export default class LinkedBinarySearchTree<T> extends LinkedBinaryTree<T> {
 
         const newRoot = cursor.left;
 
-        // newRoot.appendRight(cursor.right);
-
         LinkedBinarySearchTree.appendRightRecursively(newRoot, cursor.right);
 
         return newRoot;
-        // }
     }
 
-    delete(elem: T): LinkedBinaryTreeNode<T> | null {
+    // delete(elem: T): LinkedBinaryTreeNode<T> | null {
+    delete(elem: T): void {
         if (!this.root)
-            return null;
+            return;
 
-        return LinkedBinarySearchTree.recursiveDelete(this.root, elem);
+        this.root = LinkedBinarySearchTree.recursiveDelete(this.root, elem);
     }
 
     // delete(elem: T): LinkedBinaryTreeNode<T> | null {
