@@ -1,4 +1,4 @@
-import LinkedBinaryTreeNode from "./LinkedBinaryTree.ts";
+import { LinkedBinaryTreeNode } from "./LinkedBinaryTree.ts";
 import { DeepTraverseOptions } from "./BinaryTree.ts";
 import { assertEquals } from "@std/assert";
 
