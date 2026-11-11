@@ -10,9 +10,8 @@ export default class LinkedBinaryTree<T> extends BinaryTree<T> {
     public root: LinkedBinaryTreeNode<T> | null = null;
 
     override flattenBroad(options: {
-        action: Action<T>,
-        inverseHorizontal: boolean,
-        inverseVertical: boolean,
+        inverseHorizontal?: boolean,
+        inverseVertical?: boolean,
     }): T[] {
         return this.root?.flattenBroad(options) ?? [];
     }
@@ -32,8 +31,8 @@ export default class LinkedBinaryTree<T> extends BinaryTree<T> {
 
 export class LinkedBinaryTreeNode<T> extends BinaryTree<T> {
     data: T;
-    left?: LinkedBinaryTreeNode<T>;
-    right?: LinkedBinaryTreeNode<T>;
+    left: LinkedBinaryTreeNode<T> | null = null;
+    right: LinkedBinaryTreeNode<T> | null = null;
 
     constructor(
         data: T,
@@ -43,8 +42,8 @@ export class LinkedBinaryTreeNode<T> extends BinaryTree<T> {
         super();
 
         this.data = data;
-        this.left = left;
-        this.right = right;
+        this.left = left ?? null;
+        this.right = right ?? null;
     }
 
     static fromRecursiveArray<T>([data, left, right]: RecursiveArray<T>): LinkedBinaryTreeNode<T> {
