@@ -1,18 +1,18 @@
-import LinkedBinaryTree from "./LinkedBinaryTree.ts";
+import LinkedBinaryTreeNode from "./LinkedBinaryTree.ts";
 import { DeepTraverseOptions } from "./BinaryTree.ts";
 import { assertEquals } from "@std/assert";
 
 function sample() {
-    const root = new LinkedBinaryTree(1);
+    const root = new LinkedBinaryTreeNode(1);
 
-    root.left = new LinkedBinaryTree(2);
-    root.right = new LinkedBinaryTree(3);
+    root.left = new LinkedBinaryTreeNode(2);
+    root.right = new LinkedBinaryTreeNode(3);
 
-    root.left.left = new LinkedBinaryTree(4);
-    root.left.right = new LinkedBinaryTree(5);
+    root.left.left = new LinkedBinaryTreeNode(4);
+    root.left.right = new LinkedBinaryTreeNode(5);
 
-    root.right.left = new LinkedBinaryTree(6);
-    root.right.right = new LinkedBinaryTree(7);
+    root.right.left = new LinkedBinaryTreeNode(6);
+    root.right.right = new LinkedBinaryTreeNode(7);
 
     return root;
 }
@@ -58,7 +58,7 @@ Deno.test.each(deepTests)(
 });
 
 function irregularTree() {
-    return LinkedBinaryTree.fromRecursiveArray([
+    return LinkedBinaryTreeNode.fromRecursiveArray([
             'F',
             ['B',
                 ['A'],

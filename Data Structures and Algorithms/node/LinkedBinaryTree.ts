@@ -6,15 +6,15 @@ type RecursiveArray<T> = [
     RecursiveArray<T> | undefined,
 ] | [T];
 
-export default class LinkedBinaryTree<T> extends BinaryTree<T> {
+export default class LinkedBinaryTreeNode<T> extends BinaryTree<T> {
     data: T;
-    left?: LinkedBinaryTree<T>;
-    right?: LinkedBinaryTree<T>;
+    left?: LinkedBinaryTreeNode<T>;
+    right?: LinkedBinaryTreeNode<T>;
 
     constructor(
         data: T,
-        left?: LinkedBinaryTree<T>,
-        right?: LinkedBinaryTree<T>,
+        left?: LinkedBinaryTreeNode<T>,
+        right?: LinkedBinaryTreeNode<T>,
     ) {
         super();
 
@@ -23,10 +23,10 @@ export default class LinkedBinaryTree<T> extends BinaryTree<T> {
         this.right = right;
     }
 
-    static fromRecursiveArray<T>([data, left, right]: RecursiveArray<T>): LinkedBinaryTree<T> {
-        const left_ = left ? LinkedBinaryTree.fromRecursiveArray(left) : undefined;
-        const right_ = right ? LinkedBinaryTree.fromRecursiveArray(right) : undefined;
-        return new LinkedBinaryTree(data, left_, right_);
+    static fromRecursiveArray<T>([data, left, right]: RecursiveArray<T>): LinkedBinaryTreeNode<T> {
+        const left_ = left ? LinkedBinaryTreeNode.fromRecursiveArray(left) : undefined;
+        const right_ = right ? LinkedBinaryTreeNode.fromRecursiveArray(right) : undefined;
+        return new LinkedBinaryTreeNode(data, left_, right_);
     }
 
     override traverseDeep({
@@ -77,8 +77,8 @@ export default class LinkedBinaryTree<T> extends BinaryTree<T> {
                 .forEach(action);
         }
 
-        let order: LinkedBinaryTree<T>[] = [this];
-        let more: LinkedBinaryTree<T>[] = [];
+        let order: LinkedBinaryTreeNode<T>[] = [this];
+        let more: LinkedBinaryTreeNode<T>[] = [];
 
         while (order.length) {
             // console.log(order.map(it => it.data));

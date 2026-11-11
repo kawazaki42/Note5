@@ -1,6 +1,6 @@
 // import { assert } from "node:console";
 import BinaryTree from "./BinaryTree.ts";
-import LinkedBinaryTree from "./LinkedBinaryTree.ts";
+import LinkedBinaryTreeNode from "./LinkedBinaryTree.ts";
 
 // class BinarySearchTree<T> {
 //     private raw: BinaryTree<T>
@@ -16,7 +16,7 @@ export type Path = (0 | 1)[];
 //     path: Path,
 // } | null;
 
-export default class LinkedBinarySearchTree<T> extends LinkedBinaryTree<T> {
+export default class LinkedBinarySearchTree<T> extends LinkedBinaryTreeNode<T> {
     // insert() {
 
     // }
