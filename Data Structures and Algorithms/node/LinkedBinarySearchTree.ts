@@ -1,6 +1,6 @@
 // import { assert } from "node:console";
 import BinaryTree from "./BinaryTree.ts";
-import LinkedBinaryTreeNode from "./LinkedBinaryTree.ts";
+import { LinkedBinaryTreeNode } from "./LinkedBinaryTree.ts";
 
 // class BinarySearchTree<T> {
 //     private raw: BinaryTree<T>

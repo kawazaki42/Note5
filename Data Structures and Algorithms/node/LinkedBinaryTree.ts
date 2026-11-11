@@ -7,26 +7,26 @@ type RecursiveArray<T> = [
 ] | [T];
 
 export default class LinkedBinaryTree<T> extends BinaryTree<T> {
-    public head: LinkedBinaryTreeNode<T> | null = null;
+    public root: LinkedBinaryTreeNode<T> | null = null;
 
     override flattenBroad(options: {
         action: Action<T>,
         inverseHorizontal: boolean,
         inverseVertical: boolean,
     }): T[] {
-        return this.head?.flattenBroad(options) ?? [];
+        return this.root?.flattenBroad(options) ?? [];
     }
 
     override flattenDeep(options: DeepTraverseOptions): T[] {
-        return this.head?.flattenDeep(options) ?? [];
+        return this.root?.flattenDeep(options) ?? [];
     }
     
     override traverseBroad(options: { action: Action<T>; inverseHorizontal: boolean; inverseVertical: boolean; }): void {
-        return this.head?.traverseBroad(options);
+        return this.root?.traverseBroad(options);
     }
 
     override traverseDeep(options: DeepTraverseOptions & { action: Action<T>; }): void {
-        return this.head?.traverseDeep(options);
+        return this.root?.traverseDeep(options);
     }
 }
 
