@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, expect, it, test } from "bun:test";
 import { BTree4, BTree4Node } from "../src/BTree.ts";
 
 describe("2-3-4-tree", () => {
@@ -10,9 +10,42 @@ describe("2-3-4-tree", () => {
     console.debug(tree.toYaml());
   });
 
-  describe("node split algorithm", () => {
+  test("node split algorithm", () => {
     const node = new BTree4Node([1, 2, 3], [null, null, null, null]);
 
-    console.debug(node.split());
+    // console.debug(node.split());
+    // expect(node.split()).toMatchObject({
+    //   data: [2],
+    //   children: [
+    //     {
+    //       data: [1],
+    //       children: [null, null],
+    //     },
+    //     {
+    //       data: [2],
+    //       children: [null, null],
+    //     },
+    //   ],
+    // });
+
+    const result = node.split();
+
+    expect(result).not.toBeNil();
+
+    const [center, left, right] = result!;
+
+    expect(center).toBe(2);
+
+    expect(left).toMatchObject({
+      data: [1],
+      children: [null, null],
+    });
+
+    expect(right).toMatchObject({
+      data: [3],
+      children: [null, null],
+    });
+
+    // expect(result?.data).toHaveProperty("data", [2]);
   });
 });
