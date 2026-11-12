@@ -1,7 +1,6 @@
 import { LinkedBinaryTreeNode } from "../src/LinkedBinaryTree.ts";
 import type { DeepTraverseOptions } from "../src/BinaryTree.ts";
-// import { assertEquals } from "@std/assert";
-import { describe, it, expect } from "bun:test";
+import { describe, it, expect, test } from "bun:test";
 
 function sample() {
   const root = new LinkedBinaryTreeNode(1);
@@ -16,6 +15,14 @@ function sample() {
   root.right.right = new LinkedBinaryTreeNode(7);
 
   return root;
+}
+
+function irregularTree() {
+  return LinkedBinaryTreeNode.fromRecursiveArray([
+    "F",
+    ["B", ["A"], ["D", ["C"], ["E"]]],
+    ["G", undefined, ["I", ["H"], undefined]],
+  ]);
 }
 
 const deepTests: (DeepTraverseOptions & {
@@ -37,7 +44,7 @@ const deepTests: (DeepTraverseOptions & {
     expected: [1, 3, 7, 6, 2, 5, 4],
   },
   {
-    label: "h-filpped, parent last",
+    label: "h-flipped, parent last",
     inverseHorizontal: true,
     putParentAt: 2,
     expected: [7, 6, 3, 5, 4, 2, 1],
@@ -54,37 +61,6 @@ const deepTests: (DeepTraverseOptions & {
     expected: [7, 3, 6, 1, 5, 2, 4],
   },
 ];
-
-describe("linked binary tree", () => {
-  it.each(deepTests)(
-    "does deep traverse: $label",
-    ({ label: _, expected, ...options }) => {
-      // assert(sample().flattenDeep(options), expected);
-      expect(sample().flattenDeep(options)).toEqual(expected);
-    },
-  );
-
-  it.each(broadTests)(
-    "does broad traverse: $label",
-    ({ expected, ...options }) => {
-      expect(irregularTree().flattenBroad(options)).toEqual(expected.split(""));
-    },
-  );
-});
-
-// Deno.test.each(deepTests)(
-//     "deep traverse ($label)",
-//     ({ label: _, expected, ...options }) => {
-//         assertEquals(sample().flattenDeep(options), expected);
-// });
-
-function irregularTree() {
-  return LinkedBinaryTreeNode.fromRecursiveArray([
-    "F",
-    ["B", ["A"], ["D", ["C"], ["E"]]],
-    ["G", undefined, ["I", ["H"], undefined]],
-  ]);
-}
 
 const broadTests = [
   {
@@ -109,6 +85,16 @@ const broadTests = [
   },
 ];
 
-// Deno.test.each(broadTests)('broad traverse: unusual tree ($label)', ({expected, ...options}) => {
-//     assertEquals(irregularTree().flattenBroad(options), expected.split(''));
-// });
+describe("linked binary tree", () => {
+  describe("deep traverse", () => {
+    test.each(deepTests)("$label", ({ label: _, expected, ...options }) => {
+      expect(sample().flattenDeep(options)).toEqual(expected);
+    });
+  });
+
+  describe("broad traverse", () => {
+    test.each(broadTests)("$label", ({ expected, ...options }) => {
+      expect(irregularTree().flattenBroad(options)).toEqual(expected.split(""));
+    });
+  });
+});
