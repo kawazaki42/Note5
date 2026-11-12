@@ -1,5 +1,5 @@
 {
-  "name": "node",
+  "name": "dsa",
   "private": true,
   "scripts": {
     "typecheck": "bun check"
