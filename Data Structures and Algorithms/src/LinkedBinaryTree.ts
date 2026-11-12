@@ -5,10 +5,10 @@ type RecursiveArray<T> =
   [T, RecursiveArray<T> | undefined, RecursiveArray<T> | undefined] | [T];
 
 type Repr<T> = {
-  data: T,
-  left?: Repr<T>,
-  right?: Repr<T>,
-}
+  data: T;
+  left?: Repr<T>;
+  right?: Repr<T>;
+};
 
 export default class LinkedBinaryTree<T> extends BinaryTree<T> {
   public root: LinkedBinaryTreeNode<T> | null = null;
@@ -38,9 +38,9 @@ export default class LinkedBinaryTree<T> extends BinaryTree<T> {
     return this.root?.traverseDeep(options);
   }
 
-  // repr(): Repr<T> {
-
-  // }
+  repr(): Repr<T> | string {
+    return this.root?.repr() ?? "empty";
+  }
 }
 
 export class LinkedBinaryTreeNode<T> extends BinaryTree<T> {
@@ -154,13 +154,11 @@ export class LinkedBinaryTreeNode<T> extends BinaryTree<T> {
   repr(): Repr<T> {
     const result: Repr<T> = {
       data: this.data,
-    }
+    };
 
-    if (this.left)
-      result.left = this.left.repr();
+    if (this.left) result.left = this.left.repr();
 
-    if (this.right)
-      result.right = this.right.repr();
+    if (this.right) result.right = this.right.repr();
 
     return result;
   }
