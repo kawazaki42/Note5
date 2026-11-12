@@ -1,4 +1,5 @@
-import BinaryTree, { Action, DeepTraverseOptions } from "./BinaryTree.ts";
+import BinaryTree from "./BinaryTree.ts";
+import type { Action, DeepTraverseOptions } from "./BinaryTree.ts";
 
 export default class ArrayBinaryTree<T> extends BinaryTree<T> {
     flatData = [];
@@ -17,10 +18,15 @@ export default class ArrayBinaryTree<T> extends BinaryTree<T> {
     }) {
         // action(flatindex);
 
-        if (!(index in this.flatData))
+        // if (!(index in this.flatData))
+        //     return;
+
+        const data = this.flatData[index];
+
+        if (data === undefined)
             return;
 
-        action(this.flatData[index]);
+        action(data);
 
         const leftChild = ArrayBinaryTree.leftChildOf(index);
         const rightChild = ArrayBinaryTree.rightChildOf(index);

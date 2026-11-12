@@ -1,4 +1,5 @@
-import BinaryTree, { Action, DeepTraverseOptions } from "./BinaryTree.ts";
+import BinaryTree from "./BinaryTree.ts";
+import type { Action, DeepTraverseOptions } from "./BinaryTree.ts";
 
 type RecursiveArray<T> = [
     T,
