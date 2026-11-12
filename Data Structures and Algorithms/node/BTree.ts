@@ -1,0 +1,242 @@
+import { assert } from "node:console";
+
+// function ()
+
+// export abstract class BTreeNode<T> {
+//     data: T[];
+//     children: (BTreeNode<T> | null)[];
+
+//     constructor(data: T[], children: (BTreeNode<T> | null)[]) {
+//         if (children.length - data.length !== 1)
+//             throw TypeError();
+
+//         this.data = data;
+//         this.children = children;
+//     }
+
+//     // insertFlat(element: T) {
+
+//     // }
+
+//     isLeaf(): boolean {
+//         return !this.children.some(it => it !== null);
+//     }
+// }
+
+export class BTree4Node<T> {
+    data: T[];
+    children: (BTree4Node<T> | null)[];
+
+    constructor(data: T[], children: (BTree4Node<T> | null)[]) {
+        if (children.length - data.length !== 1)
+            throw TypeError();
+
+        this.data = data;
+        this.children = children;
+    }
+
+    isLeaf(): boolean {
+        return !this.children.some(it => it !== null);
+    }
+
+    private validate(): void {
+        assert(this.children.length <= 4);
+        assert(this.children.length >= 2);
+    }
+
+    split(): [T, BTree4Node<T>, BTree4Node<T>] | null {
+        this.validate();
+
+        if (this.children.length !== 4)
+            return null;
+
+        // const newRootData = [this.data[1]];
+
+        const [left, center, right] = this.data;
+        const [ll, lr, rl, rr] = this.children;
+
+        const leftNode = new BTree4Node([left], [ll, lr]);
+        const rightNode = new BTree4Node([right], [rl, rr]);
+
+        // const newRoot = new BTree4Node([center], [leftNode, rightNode]);
+        // return newRoot;
+
+        return [center, leftNode, rightNode];
+    }
+
+    // canInsertAt(element: T): number {
+    //     let rightBound = 0;
+
+    //     while (element > this.data[rightBound]) {
+    //         rightBound++;
+    //     }
+
+    //     return rightBound;
+    // }
+
+    childFor(element: T): ChildInfo<T> {
+        // let rightBound = 0;
+
+        // while (element > this.data[rightBound]) {
+        //     rightBound++;
+        // }
+
+        // return rightBound;
+
+        for (let i = 0; i < this.data.length; i++) {
+            if (element < this.data[i]) {
+                return {
+                    link: i,
+                    // node: this.children[i] as (BTree4Node<T> | null),
+                    node: this.children[i],
+                };
+            }
+        }
+
+        return {
+            link: 3,
+            // node: this.children[3] as (BTree4Node<T> | null),
+            node: this.children[3],
+        };
+    }
+
+    // insertFlat(element: T) {
+    //     if (this.children.length >= 4)
+    //         throw Error();
+
+
+    // }
+
+    // maybeSplit(): BTree4Node<T> | null {
+    //     this.validate();
+
+    //     if (this.children.length !== 4)
+    //         return this;
+
+    //     // const newRootData = [this.data[1]];
+
+    //     const [left, center, right] = this.data;
+    //     const [ll, lr, rl, rr] = this.children;
+
+    //     const leftNode = new BTree4Node([left], [ll, lr]);
+    //     const rightNode = new BTree4Node([right], [rl, rr]);
+
+    //     const newRoot = new BTree4Node([center], [leftNode, rightNode]);
+
+    //     return newRoot;
+    // }
+
+    // insert(element: T) {
+    //     // let rightBound = 0;
+
+    //     // while (element < this.data[rightBound]) {
+    //     //     rightBound++;
+    //     // }
+
+    //     // this.validate()
+
+    //     // if (this.children.length === 4) {
+
+    //     // }
+
+    //     const split = this.split();
+
+    //     // if (split) {
+    //     //     // const [center, leftNode, rightNode] = split;
+    //     //     return split;
+    //     // }
+    // }
+}
+
+interface ChildInfo<T> {
+    node: BTree4Node<T> | null;
+    link: number;
+}
+
+interface PathElement<T> {
+    node: BTree4Node<T>;
+    link: 0 | 1 | 2;
+}
+
+export class BTree4<T> {
+    root: BTree4Node<T> | null = null;
+
+    insert(element: T) {
+        if (!this.root) {
+            this.root = new BTree4Node([element], [null, null]);
+            return;
+        }
+
+        // const parents: BTree4Node<T>[] = [];
+        // const path: (0 | 1 | 2)[] = [];
+        const path: PathElement<T>[] = [];
+        let cursor = this.root;
+
+        while (true) {
+            const split = cursor.split();
+
+            if (split) {
+                const [center, left, right] = split;
+
+                const parent = path.pop();
+                if (parent) {
+                    const { node, link } = parent;
+
+                    assert(node.children.length < 4);
+
+                    node.data.splice(link, 0, center);
+                    node.children.splice(link, 1, left, right);
+
+                    cursor = node;
+                } else {
+                    this.root = new BTree4Node([center], [left, right]);
+                    cursor = this.root;
+                }
+            }
+
+            const { node, link } = cursor.childFor(element);
+
+            if (!node) {
+                cursor.children[link] = new BTree4Node([element], [null, null]);
+                return;
+            }
+
+            if (node.isLeaf()) {
+                node.data.push(element);
+                node.children.push(null);
+                node.data.sort();
+                return;
+            }
+
+            path.push({node, link: link as (0 | 1 | 2)});
+            cursor = node;
+        }
+
+        // cursor = node;
+
+        // cursor = cursor.children[childLink];
+
+        // if (split) {
+        //     const [center, left, right] = split;
+
+        //     if (cursor === this.root) {
+        //         this.root = new BTree4Node([center], [left, right]);
+        //     } else {
+
+        //     }
+        // }
+
+        // this.root = this.root.maybeSplit() ?? this.root;
+
+        // if (element )
+
+        // this.root.data.push(element);
+        // this.root.children.push(null);
+
+
+
+        // if (this.root.children.length === 4) {
+        //     const newRootData = this.root.
+        // }
+    }
+}
