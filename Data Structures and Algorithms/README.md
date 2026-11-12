@@ -1,4 +1,6 @@
-# node
+# Data structures and algorithms
+
+ванечкин дую спик иниглишь?
 
 To install dependencies:
 
