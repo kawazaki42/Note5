@@ -23,6 +23,11 @@ import { assert } from "node:console";
 //     }
 // }
 
+type Repr<T> = {
+  data: string;
+  children: (Repr<T> | "null")[];
+};
+
 export class BTree4Node<T> {
   data: T[];
   children: (BTree4Node<T> | null)[];
@@ -32,6 +37,15 @@ export class BTree4Node<T> {
 
     this.data = data;
     this.children = children;
+  }
+
+  repr(): Repr<T> {
+    const result: Repr<T> = {
+      data: JSON.stringify(this.data),
+      children: this.children.map((it) => it?.repr() ?? "null"),
+    };
+
+    return result;
   }
 
   isLeaf(): boolean {
@@ -109,12 +123,12 @@ export class BTree4Node<T> {
       }
     }
 
-    const node = this.children[3];
+    const node = this.children.at(-1);
 
     if (node === undefined) throw Error();
 
     return {
-      link: 3,
+      link: this.children.length - 1,
       // node: this.children[3] as (BTree4Node<T> | null),
       node,
     };
@@ -180,6 +194,12 @@ interface PathElement<T> {
 export class BTree4<T> {
   root: BTree4Node<T> | null = null;
 
+  toYaml(): string {
+    if (!this.root) return "empty";
+
+    return Bun.YAML.stringify(this.root.repr(), null, 2);
+  }
+
   insert(element: T) {
     if (!this.root) {
       this.root = new BTree4Node([element], [null, null]);
@@ -188,8 +208,17 @@ export class BTree4<T> {
 
     // const parents: BTree4Node<T>[] = [];
     // const path: (0 | 1 | 2)[] = [];
-    const path: PathElement<T>[] = [];
+    // const path: PathElement<T>[] = [];
+    // let parent: BTree4Node<T> | null = null;
+    // let parentLink: number | null = null;
+
+    let parent: ParentInfo<T> | null = null;
     let cursor = this.root;
+
+    interface ParentInfo<T> {
+      node: BTree4Node<T>;
+      backLink: number;
+    }
 
     while (true) {
       const split = cursor.split();
@@ -197,9 +226,11 @@ export class BTree4<T> {
       if (split) {
         const [center, left, right] = split;
 
-        const parent = path.pop();
+        // const parent = path.pop();
         if (parent) {
-          const { node, link } = parent;
+          const { node, backLink: link } = parent;
+          // const node = parent;
+          // const link = parentLink;
 
           assert(node.children.length < 4);
 
@@ -213,21 +244,25 @@ export class BTree4<T> {
         }
       }
 
+      if (cursor.isLeaf()) {
+        cursor.data.push(element);
+        cursor.children.push(null);
+        cursor.data.sort();
+        return;
+      }
+
       const { node, link } = cursor.childFor(element);
 
+      // console.debug("!!!");
       if (!node) {
         cursor.children[link] = new BTree4Node([element], [null, null]);
         return;
       }
 
-      if (node.isLeaf()) {
-        node.data.push(element);
-        node.children.push(null);
-        node.data.sort();
-        return;
-      }
-
-      path.push({ node, link: link as 0 | 1 | 2 });
+      // path.push({ node, link: link as 0 | 1 | 2 });
+      // parent = cursor;
+      // parentLink = link;
+      parent = { node: cursor, backLink: link };
       cursor = node;
     }
 
