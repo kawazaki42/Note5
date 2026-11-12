@@ -1,4 +1,4 @@
-import LinkedBinarySearchTree from "./LinkedBinarySearchTree.ts";
+import LinkedBinarySearchTree from "../src/LinkedBinarySearchTree.ts";
 import { describe, it } from "node:test";
 
 describe("linked binary search tree", () => {

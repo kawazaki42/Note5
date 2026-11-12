@@ -1,5 +1,5 @@
 import test, { describe, it } from "node:test";
-import { BTree4 } from "./BTree.ts";
+import { BTree4 } from "../src/BTree.ts";
 
 describe("2-3-4-tree", () => {
   it("inserts", () => {

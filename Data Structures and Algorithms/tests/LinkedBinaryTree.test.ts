@@ -1,5 +1,5 @@
-import { LinkedBinaryTreeNode } from "./LinkedBinaryTree.ts";
-import type { DeepTraverseOptions } from "./BinaryTree.ts";
+import { LinkedBinaryTreeNode } from "../src/LinkedBinaryTree.ts";
+import type { DeepTraverseOptions } from "../src/BinaryTree.ts";
 // import { assertEquals } from "@std/assert";
 import { describe, it, expect } from "bun:test";
 
