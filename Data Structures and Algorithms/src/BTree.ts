@@ -24,244 +24,236 @@ import { assert } from "node:console";
 // }
 
 export class BTree4Node<T> {
-    data: T[];
-    children: (BTree4Node<T> | null)[];
+  data: T[];
+  children: (BTree4Node<T> | null)[];
 
-    constructor(data: T[], children: (BTree4Node<T> | null)[]) {
-        if (children.length - data.length !== 1)
-            throw TypeError();
+  constructor(data: T[], children: (BTree4Node<T> | null)[]) {
+    if (children.length - data.length !== 1) throw TypeError();
 
-        this.data = data;
-        this.children = children;
-    }
+    this.data = data;
+    this.children = children;
+  }
 
-    isLeaf(): boolean {
-        return !this.children.some(it => it !== null);
-    }
+  isLeaf(): boolean {
+    return !this.children.some((it) => it !== null);
+  }
 
-    private validate(): void {
-        assert(this.children.length <= 4);
-        assert(this.children.length >= 2);
-    }
+  private validate(): void {
+    assert(this.children.length <= 4);
+    assert(this.children.length >= 2);
+  }
 
-    split(): [T, BTree4Node<T>, BTree4Node<T>] | null {
-        this.validate();
+  split(): [T, BTree4Node<T>, BTree4Node<T>] | null {
+    this.validate();
 
-        if (this.children.length !== 4)
-            return null;
+    if (this.children.length !== 4) return null;
 
-        // const newRootData = [this.data[1]];
+    // const newRootData = [this.data[1]];
 
-        assert(this.data.length === 3);
-        assert(!this.data.some(it => it === undefined));
-        assert(!this.children.some(it => it === undefined));
+    assert(this.data.length === 3);
+    assert(!this.data.some((it) => it === undefined));
+    assert(!this.children.some((it) => it === undefined));
 
-        const [left, center, right] = this.data as [T, T, T];
-        const [ll, lr, rl, rr] = this.children as [
-            BTree4Node<T>,
-            BTree4Node<T>,
-            BTree4Node<T>,
-            BTree4Node<T>,
-        ];
+    const [left, center, right] = this.data as [T, T, T];
+    const [ll, lr, rl, rr] = this.children as [
+      BTree4Node<T>,
+      BTree4Node<T>,
+      BTree4Node<T>,
+      BTree4Node<T>,
+    ];
 
-        // assert(ll, lr, rl, rr);
+    // assert(ll, lr, rl, rr);
 
-        const leftNode = new BTree4Node([left], [ll, lr]);
-        const rightNode = new BTree4Node([right], [rl, rr]);
+    const leftNode = new BTree4Node([left], [ll, lr]);
+    const rightNode = new BTree4Node([right], [rl, rr]);
 
-        // const newRoot = new BTree4Node([center], [leftNode, rightNode]);
-        // return newRoot;
+    // const newRoot = new BTree4Node([center], [leftNode, rightNode]);
+    // return newRoot;
 
-        return [center, leftNode, rightNode];
-    }
+    return [center, leftNode, rightNode];
+  }
 
-    // canInsertAt(element: T): number {
-    //     let rightBound = 0;
+  // canInsertAt(element: T): number {
+  //     let rightBound = 0;
 
-    //     while (element > this.data[rightBound]) {
-    //         rightBound++;
-    //     }
+  //     while (element > this.data[rightBound]) {
+  //         rightBound++;
+  //     }
 
-    //     return rightBound;
+  //     return rightBound;
+  // }
+
+  childFor(element: T): ChildInfo<T> {
+    // let rightBound = 0;
+
+    // while (element > this.data[rightBound]) {
+    //     rightBound++;
     // }
 
-    childFor(element: T): ChildInfo<T> {
-        // let rightBound = 0;
+    // return rightBound;
 
-        // while (element > this.data[rightBound]) {
-        //     rightBound++;
-        // }
+    for (let i = 0; i < this.data.length; i++) {
+      const cur = this.data[i];
+      const child = this.children[i];
 
-        // return rightBound;
+      if (!cur) throw Error();
 
-        for (let i = 0; i < this.data.length; i++) {
-            const cur = this.data[i];
-            const child = this.children[i];
+      if (child === undefined) throw Error();
 
-            if (!cur)
-                throw Error();
-
-            if (child === undefined)
-                throw Error();
-
-            if (element < cur) {
-                return {
-                    link: i,
-                    // node: this.children[i] as (BTree4Node<T> | null),
-                    node: child,
-                };
-            }
-        }
-
-        const node = this.children[3];
-
-        if (node === undefined)
-            throw Error();
-
+      if (element < cur) {
         return {
-            link: 3,
-            // node: this.children[3] as (BTree4Node<T> | null),
-            node,
+          link: i,
+          // node: this.children[i] as (BTree4Node<T> | null),
+          node: child,
         };
+      }
     }
 
-    // insertFlat(element: T) {
-    //     if (this.children.length >= 4)
-    //         throw Error();
+    const node = this.children[3];
 
+    if (node === undefined) throw Error();
 
-    // }
+    return {
+      link: 3,
+      // node: this.children[3] as (BTree4Node<T> | null),
+      node,
+    };
+  }
 
-    // maybeSplit(): BTree4Node<T> | null {
-    //     this.validate();
+  // insertFlat(element: T) {
+  //     if (this.children.length >= 4)
+  //         throw Error();
 
-    //     if (this.children.length !== 4)
-    //         return this;
+  // }
 
-    //     // const newRootData = [this.data[1]];
+  // maybeSplit(): BTree4Node<T> | null {
+  //     this.validate();
 
-    //     const [left, center, right] = this.data;
-    //     const [ll, lr, rl, rr] = this.children;
+  //     if (this.children.length !== 4)
+  //         return this;
 
-    //     const leftNode = new BTree4Node([left], [ll, lr]);
-    //     const rightNode = new BTree4Node([right], [rl, rr]);
+  //     // const newRootData = [this.data[1]];
 
-    //     const newRoot = new BTree4Node([center], [leftNode, rightNode]);
+  //     const [left, center, right] = this.data;
+  //     const [ll, lr, rl, rr] = this.children;
 
-    //     return newRoot;
-    // }
+  //     const leftNode = new BTree4Node([left], [ll, lr]);
+  //     const rightNode = new BTree4Node([right], [rl, rr]);
 
-    // insert(element: T) {
-    //     // let rightBound = 0;
+  //     const newRoot = new BTree4Node([center], [leftNode, rightNode]);
 
-    //     // while (element < this.data[rightBound]) {
-    //     //     rightBound++;
-    //     // }
+  //     return newRoot;
+  // }
 
-    //     // this.validate()
+  // insert(element: T) {
+  //     // let rightBound = 0;
 
-    //     // if (this.children.length === 4) {
+  //     // while (element < this.data[rightBound]) {
+  //     //     rightBound++;
+  //     // }
 
-    //     // }
+  //     // this.validate()
 
-    //     const split = this.split();
+  //     // if (this.children.length === 4) {
 
-    //     // if (split) {
-    //     //     // const [center, leftNode, rightNode] = split;
-    //     //     return split;
-    //     // }
-    // }
+  //     // }
+
+  //     const split = this.split();
+
+  //     // if (split) {
+  //     //     // const [center, leftNode, rightNode] = split;
+  //     //     return split;
+  //     // }
+  // }
 }
 
 interface ChildInfo<T> {
-    node: BTree4Node<T> | null;
-    link: number;
+  node: BTree4Node<T> | null;
+  link: number;
 }
 
 interface PathElement<T> {
-    node: BTree4Node<T>;
-    link: 0 | 1 | 2;
+  node: BTree4Node<T>;
+  link: 0 | 1 | 2;
 }
 
 export class BTree4<T> {
-    root: BTree4Node<T> | null = null;
+  root: BTree4Node<T> | null = null;
 
-    insert(element: T) {
-        if (!this.root) {
-            this.root = new BTree4Node([element], [null, null]);
-            return;
-        }
-
-        // const parents: BTree4Node<T>[] = [];
-        // const path: (0 | 1 | 2)[] = [];
-        const path: PathElement<T>[] = [];
-        let cursor = this.root;
-
-        while (true) {
-            const split = cursor.split();
-
-            if (split) {
-                const [center, left, right] = split;
-
-                const parent = path.pop();
-                if (parent) {
-                    const { node, link } = parent;
-
-                    assert(node.children.length < 4);
-
-                    node.data.splice(link, 0, center);
-                    node.children.splice(link, 1, left, right);
-
-                    cursor = node;
-                } else {
-                    this.root = new BTree4Node([center], [left, right]);
-                    cursor = this.root;
-                }
-            }
-
-            const { node, link } = cursor.childFor(element);
-
-            if (!node) {
-                cursor.children[link] = new BTree4Node([element], [null, null]);
-                return;
-            }
-
-            if (node.isLeaf()) {
-                node.data.push(element);
-                node.children.push(null);
-                node.data.sort();
-                return;
-            }
-
-            path.push({node, link: link as (0 | 1 | 2)});
-            cursor = node;
-        }
-
-        // cursor = node;
-
-        // cursor = cursor.children[childLink];
-
-        // if (split) {
-        //     const [center, left, right] = split;
-
-        //     if (cursor === this.root) {
-        //         this.root = new BTree4Node([center], [left, right]);
-        //     } else {
-
-        //     }
-        // }
-
-        // this.root = this.root.maybeSplit() ?? this.root;
-
-        // if (element )
-
-        // this.root.data.push(element);
-        // this.root.children.push(null);
-
-
-
-        // if (this.root.children.length === 4) {
-        //     const newRootData = this.root.
-        // }
+  insert(element: T) {
+    if (!this.root) {
+      this.root = new BTree4Node([element], [null, null]);
+      return;
     }
+
+    // const parents: BTree4Node<T>[] = [];
+    // const path: (0 | 1 | 2)[] = [];
+    const path: PathElement<T>[] = [];
+    let cursor = this.root;
+
+    while (true) {
+      const split = cursor.split();
+
+      if (split) {
+        const [center, left, right] = split;
+
+        const parent = path.pop();
+        if (parent) {
+          const { node, link } = parent;
+
+          assert(node.children.length < 4);
+
+          node.data.splice(link, 0, center);
+          node.children.splice(link, 1, left, right);
+
+          cursor = node;
+        } else {
+          this.root = new BTree4Node([center], [left, right]);
+          cursor = this.root;
+        }
+      }
+
+      const { node, link } = cursor.childFor(element);
+
+      if (!node) {
+        cursor.children[link] = new BTree4Node([element], [null, null]);
+        return;
+      }
+
+      if (node.isLeaf()) {
+        node.data.push(element);
+        node.children.push(null);
+        node.data.sort();
+        return;
+      }
+
+      path.push({ node, link: link as 0 | 1 | 2 });
+      cursor = node;
+    }
+
+    // cursor = node;
+
+    // cursor = cursor.children[childLink];
+
+    // if (split) {
+    //     const [center, left, right] = split;
+
+    //     if (cursor === this.root) {
+    //         this.root = new BTree4Node([center], [left, right]);
+    //     } else {
+
+    //     }
+    // }
+
+    // this.root = this.root.maybeSplit() ?? this.root;
+
+    // if (element )
+
+    // this.root.data.push(element);
+    // this.root.children.push(null);
+
+    // if (this.root.children.length === 4) {
+    //     const newRootData = this.root.
+    // }
+  }
 }

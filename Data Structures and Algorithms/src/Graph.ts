@@ -1,3 +1,1 @@
-export default class Graph<T> {
-    
-}
+export default class Graph<T> {}
