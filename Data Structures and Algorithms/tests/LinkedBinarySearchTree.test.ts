@@ -13,7 +13,7 @@ describe("linked binary search tree", () => {
     // console.debug(tree);
     // console.debug(JSON.stringify(root));
 
-    const debugString = Bun.YAML.stringify(tree, null, 2);
+    const debugString = Bun.YAML.stringify(tree.root?.repr(), null, 2);
 
     console.debug(debugString);
 
