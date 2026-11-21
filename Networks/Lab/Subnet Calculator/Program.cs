@@ -6,31 +6,25 @@ class Program
 {
     static void Main(string[] args)
     {
-        switch (args)
-        {
-            case [var mainNetworkArg, .. var subnetDescs]:
-                var mainNetwork = IPNetwork.Parse(mainNetworkArg);
+        if (args is not [var mainNetworkArg, .. var subnetDescs])
+            throw new ArgumentException("Should specify main network and subnets");
 
-                var subnets =
-                    from arg in subnetDescs
-                    let desc = SubnetDescription.Parse(arg)
-                    orderby desc.Size descending
-                    select desc;
+        var mainNetwork = IPNetwork.Parse(mainNetworkArg);
 
-                Calculate(mainNetwork, subnets.ToArray());
+        var subnets =
+            from arg in subnetDescs
+            let desc = SubnetDescription.Parse(arg)
+            orderby desc.Size descending
+            select desc;
 
-                break;
-
-            default:
-                throw new ArgumentException("Should specify main network and subnets");
-        }
+        Calculate(mainNetwork, subnets.ToArray());
     }
 
     static void Calculate(IPNetwork mainNetwork, SubnetDescription[] subnets)
     {
         foreach (var s in subnets)
         {
-            Console.WriteLine($"{s} => {s.PrefixLength}");
+            Console.WriteLine($"{s}");
         }
     }
 }
@@ -56,14 +50,9 @@ internal record struct SubnetDescription(string Name, uint Size)
 
     public static SubnetDescription Parse(string s)
     {
-        switch (s.Split(':'))
-        {
-            case [string name, string size]:
-                return new SubnetDescription(name, uint.Parse(size));
-            default:
-                throw new FormatException($"Invalid subnetwork description: {s}");
-        }
-    }
+        if (s.Split(':') is not [var name, var size])
+            throw new FormatException($"Invalid subnetwork description: {s}");
 
-    public override string ToString() => $"{Name}: {Size}";
+        return new SubnetDescription(name, uint.Parse(size));
+    }
 }
