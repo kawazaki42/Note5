@@ -1,10 +1,53 @@
 class ArgumentError extends Error {};
 
-// function parseIPv4(s: string): [number, number, number, number, number] {
-function parseIPv4(s: string): {
+const BITS_PER_IPV4_ADDRESS = 32;
+
+type IpAddress = {
     octets: [number, number, number, number],
     maskLength: number,
-} | null {
+}
+
+// type IpAddress = [number, number, number, number];
+
+// class Network {
+//     ipAddress: IpAddress;
+//     maskLength: number;
+
+//     constructor(ipAddress: IpAddress, maskLength: number) {
+//         this.ipAddress = ipAddress;
+//         this.maskLength = maskLength;
+//     }
+
+//     get size() {
+//         return 2 ** (BITS_PER_IPV4_ADDRESS - this.maskLength);
+//     }
+// }
+
+// type Subnet = {
+//     name: string,
+//     size: number,
+// }
+
+class Subnet {
+    name: string;
+    size: number;
+
+    constructor(name: string, size: number) {
+        this.name = name;
+        this.size = size;
+    }
+
+    get bitLength(): number {
+        return closestPow2(this.size + 2)
+    }
+
+    get maskLength(): number {
+        return BITS_PER_IPV4_ADDRESS - this.bitLength;
+    }
+}
+
+// function parseIPv4(s: string): [number, number, number, number, number] {
+function parseIPv4(s: string): IpAddress | null {
     const int = "(\\d+)";
     const dot = "\\.";
 
@@ -19,32 +62,64 @@ function parseIPv4(s: string): {
 
     const maskLength = Number(match.pop());
 
+    // danger
     const octets = match.map(Number) as [number, number, number, number];
 
     return { octets, maskLength };
 }
 
-function parseArgs(argv: string[]) {
+function parseSubnetDesc(desc: string): Subnet {
+    const [name, size] = desc.split(':');
+
+    if (name === undefined)
+        throw new ArgumentError("No subnet name specified (should be name:size)");
+
+    if (size === undefined)
+        throw new ArgumentError("No subnet size specified (should be name:size)");
+
+    return new Subnet(
+        name,
+        Number(size),
+    );
+}
+
+function parseArgs(argv: string[]): [IpAddress, Subnet[]] {
     const args = argv.toSpliced(0, 2);
 
-    const network = args.shift();
-    const subnets = args.map(Number);
+    // const ip = args.shift();
+    // const subnets = args.map(Number);
+
+    const [ip, ...subnetDescs] = args;
+
+    // subnets = subnets.map(Number);
+
+    const subnets = subnetDescs.map(desc => parseSubnetDesc(desc));
 
     console.debug(subnets);
 
-    if (!network) {
+    if (!ip) {
         throw new ArgumentError("No toplevel network specified");
     }
 
     if (subnets.length < 1)
         throw new ArgumentError("No subnetwork sizes specified");
 
-    const network = parseIPv4(network);
+    const network = parseIPv4(ip);
 
-    // return [network, subnets];
+    if (!network)
+        throw new ArgumentError("Invalid IPv4 address");
+
+    return [network, subnets];
 }
 
-function main() {// node, .js
+function closestPow2(x: number): number {
+    const bits = Math.log2(x);
+    return Math.ceil(bits);
+}
+
+function main() {
+    
+    // node, .js
 
 
     // let parts = network.split('/');
@@ -62,11 +137,6 @@ function main() {// node, .js
 
     // const octets = match.slice(1, 5)
 
-    function closestPow2(x: number): number {
-        const bits = Math.log2(x);
-        return Math.ceil(bits);
-    }
-
     // function roundUpToPow2(x: number): number {
 
 
@@ -83,13 +153,37 @@ function main() {// node, .js
 
     // const subnets = new Map();
 
-    const BITS_PER_IPV4_ADDRESS = 32;
+    const [network, subnets] = parseArgs(process.argv);
 
-    const maskSizes = subnets
-    .map(size => closestPow2(size + 2));
+    subnets.sort((a, b) => a.maskLength - b.maskLength);
+
+    if (subnets[0] === undefined)
+        throw new ArgumentError("No subnets specified");
+
+    // network.size < subnets[0].size
+    if (network.maskLength > subnets[0].maskLength)
+        throw new ArgumentError("Subnetwork too big");
+
+    
+
+
+    // for (const net of subnets) {
+    //     if net
+    // }
+
+
+    // const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+    // letters.forEach((letter, index)  )
+
+    // if (subnetSizes.length > letters.length)
+        // throw new ArgumentError("Can't assign ");
+
+    // const maskSizes = subnets
+    // .map(size => closestPow2(size + 2));
     //   .map(bits => BITS_PER_IPV4_ADDRESS - bits);
 
-    console.debug(maskSizes.map(it => 2 ** it));
+    // console.debug(maskSizes.map(it => 2 ** it));
 }
 
 main();
