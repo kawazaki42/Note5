@@ -1,28 +1,6 @@
-// Console.WriteLine(string.Join(", ", args));
-
-// #r "System.CommandLine"
-
 using System;
 using System.Net;
 using System.Numerics;
-
-// let pair = arg.Split(':', 2)
-// select pair;
-
-// let desc = new
-// {
-//     Name = pair[0],
-//     Size = int.Parse(pair.GetValue(1) ?? throw new ArgumentException())
-// }
-
-// args[1..]
-// .Select(desc => desc.Split(':', 2))
-// .Select(pair => );
-
-// foreach (var desc in subnetDescriptions)
-// {
-//     Console.WriteLine($"{desc.Name}: {desc.Size}");
-// }
 
 class Program
 {
@@ -65,27 +43,9 @@ class BinaryTree<T>
 
 internal record struct SubnetDescription(string Name, uint Size)
 {
-    // internal int bytesNeeded() => 
-
-    // static int closestPow2(uint i)
-    // {
-    //     var log = Math.Log2(i);
-    //     return (int)Math.Round(log, MidpointRounding.ToPositiveInfinity);
-    // }
-
-    // const int BITS_PER_IPV4_ADDRESS = 32;
-
     const int RESERVED_ADDRESS_COUNT = 2;
 
     uint addressesToReserve() => Size + RESERVED_ADDRESS_COUNT;
-
-    // static uint addressesNeededToReserve(uint hostCount) =>
-    //     hostCount + RESERVED_ADDRESS_COUNT - 1;
-
-    // static void watafa() {
-    // System.Numerics.BitOperations.RoundUpToPowerOf2()
-
-    // }
 
     uint maxIndexInSubnet() => addressesToReserve() - 1;
 
@@ -96,7 +56,6 @@ internal record struct SubnetDescription(string Name, uint Size)
 
     public static SubnetDescription Parse(string s)
     {
-        // var pair = s.Split(':');
         switch (s.Split(':'))
         {
             case [string name, string size]:
@@ -104,9 +63,6 @@ internal record struct SubnetDescription(string Name, uint Size)
             default:
                 throw new FormatException($"Invalid subnetwork description: {s}");
         }
-        ;
-
-        // if (pair.Length != 2)
     }
 
     public override string ToString() => $"{Name}: {Size}";
