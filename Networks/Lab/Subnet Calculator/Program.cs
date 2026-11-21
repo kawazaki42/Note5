@@ -1,6 +1,9 @@
-using System;
 using System.Net;
 using System.Numerics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+using LabeledNetwork = (string Name, System.Net.IPNetwork Network);
 
 class Program
 {
@@ -17,7 +20,7 @@ class Program
             orderby desc.Size descending
             select desc;
 
-        Calculate(mainNetwork, subnets.ToArray());
+        Calculate(mainNetwork, [.. subnets]);
     }
 
     static void Calculate(IPNetwork mainNetwork, SubnetDescription[] subnets)
@@ -26,26 +29,66 @@ class Program
         {
             Console.WriteLine($"{s}");
         }
+
+        if (!subnets.Any())
+            throw new ArgumentException("No subnetworks specified");
+
+        // mainNetwork.PrefixLength
+
+        LabeledNetwork root = ("root", mainNetwork);
+
+        var networkTree = new BinaryTree<LabeledNetwork?>
+        {
+            Value = root
+        };
+
+        // new JsonSerializerOptions{  }
+
+        // var repr = JsonSerializer.Serialize<BinaryTree<LabeledNetwork?>>(networkTree);
+        // Console.WriteLine(typeof(BinaryTree<LabeledNetwork?>));
+
+        var repr = JsonSerializer.Serialize(
+            networkTree
+            // typeof(BinaryTree<LabeledNetwork?>),
+            // JsonContext.Default
+        );
+
+        // Console.WriteLine()
+
+        Console.WriteLine(repr);
     }
 }
 
+// [JsonSerializable(typeof(SubnetDescription))]
+// [JsonSerializable(typeof(BinaryTree<LabeledNetwork?>))]
+// [JsonSerializable(typeof(LabeledNetwork))]
+// [JsonSerializable(typeof(IPNetwork))]
+// partial class JsonContext : JsonSerializerContext;
+
 class BinaryTree<T>
 {
+    [JsonInclude]
     public required T Value;
+
+    [JsonInclude]
     public BinaryTree<T>? Left = null, Right = null;
+
+    // public BinaryTree(T value) => Value = value;
 }
+
+
 
 internal record struct SubnetDescription(string Name, uint Size)
 {
     const int RESERVED_ADDRESS_COUNT = 2;
 
-    uint addressesToReserve() => Size + RESERVED_ADDRESS_COUNT;
+    private readonly uint AddressesToReserve() => Size + RESERVED_ADDRESS_COUNT;
 
-    uint maxIndexInSubnet() => addressesToReserve() - 1;
+    uint MaxIndexInSubnet() => AddressesToReserve() - 1;
 
     public int PrefixLength
     {
-        get => BitOperations.LeadingZeroCount(maxIndexInSubnet());
+        get => BitOperations.LeadingZeroCount(MaxIndexInSubnet());
     }
 
     public static SubnetDescription Parse(string s)
