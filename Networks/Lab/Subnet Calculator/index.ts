@@ -58,12 +58,20 @@ function parseIPv4(s: string): IpAddress | null {
     if (!match)
         return null;
 
-    const _full = match.shift();
+    // const _full = match.shift();
 
-    const maskLength = Number(match.pop());
+    // const maskLength = Number(match.pop());
 
     // danger
-    const octets = match.map(Number) as [number, number, number, number];
+    // const octets = match.map(Number) as [number, number, number, number];
+
+    const [, maskLengthStr, ...octetStrs] = match;
+
+    const maskLength = Number(maskLengthStr);
+    const octets = octetStrs.map(Number);
+
+    if (octets.length != 4)
+        throw new ArgumentError();
 
     return { octets, maskLength };
 }
@@ -86,8 +94,8 @@ function parseSubnetDesc(desc: string): Subnet {
 function parseArgs(argv: string[]): [IpAddress, Subnet[]] {
     const args = argv.toSpliced(0, 2);
 
-    // const ip = args.shift();
-    // const subnets = args.map(Number);
+    // // const ip = args.shift();
+    // // const subnets = args.map(Number);
 
     const [ip, ...subnetDescs] = args;
 
@@ -95,19 +103,22 @@ function parseArgs(argv: string[]): [IpAddress, Subnet[]] {
 
     const subnets = subnetDescs.map(desc => parseSubnetDesc(desc));
 
-    console.debug(subnets);
+    const [networkStr, ...subnetStrs] = args;
 
-    if (!ip) {
+    console.debug(subnetStrs);
+
+    if (!networkStr) {
         throw new ArgumentError("No toplevel network specified");
     }
 
-    if (subnets.length < 1)
+    if (subnetStrs.length < 1)
         throw new ArgumentError("No subnetwork sizes specified");
 
-    const network = parseIPv4(ip);
+    const network = parseIPv4(networkStr);
 
     if (!network)
         throw new ArgumentError("Invalid IPv4 address");
+
 
     return [network, subnets];
 }
