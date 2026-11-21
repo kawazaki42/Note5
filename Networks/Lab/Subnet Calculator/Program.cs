@@ -4,14 +4,7 @@
 
 using System;
 using System.Net;
-
-var main = IPNetwork.Parse(args[0]);
-
-var subnets =
-    from arg in args[1..]
-    let desc = SubnetDescription.Parse(arg)
-    orderby desc.Size descending
-    select desc;
+using System.Numerics;
 
 // let pair = arg.Split(':', 2)
 // select pair;
@@ -31,50 +24,90 @@ var subnets =
 //     Console.WriteLine($"{desc.Name}: {desc.Size}");
 // }
 
-// class Program
-// {
-//     static void Main(string[] args)
-//     {
-//         switch (args)
-//         {
-//             case [var mainNetwork, var subnets]:
-//                 return Calculate(mainNetwork, subnets);
-//             default:
-//                 Console.Error
-//         }
-//     }
+class Program
+{
+    static void Main(string[] args)
+    {
+        switch (args)
+        {
+            case [var mainNetworkArg, .. var subnetDescs]:
+                var mainNetwork = IPNetwork.Parse(mainNetworkArg);
 
-//     static void Calculate
-// }
+                var subnets =
+                    from arg in subnetDescs
+                    let desc = SubnetDescription.Parse(arg)
+                    orderby desc.Size descending
+                    select desc;
 
-internal record struct SubnetDescription(string Name, int Size)
+                Calculate(mainNetwork, subnets.ToArray());
+
+                break;
+
+            default:
+                throw new ArgumentException("Should specify main network and subnets");
+        }
+    }
+
+    static void Calculate(IPNetwork mainNetwork, SubnetDescription[] subnets)
+    {
+        foreach (var s in subnets)
+        {
+            Console.WriteLine($"{s} => {s.PrefixLength}");
+        }
+    }
+}
+
+class BinaryTree<T>
+{
+    public required T Value;
+    public BinaryTree<T>? Left = null, Right = null;
+}
+
+internal record struct SubnetDescription(string Name, uint Size)
 {
     // internal int bytesNeeded() => 
 
-    internal static int closestPow2(int i)
-    {
-        var log = Math.Log2(i);
-        return (int)Math.Round(log, MidpointRounding.ToPositiveInfinity);
-    }
+    // static int closestPow2(uint i)
+    // {
+    //     var log = Math.Log2(i);
+    //     return (int)Math.Round(log, MidpointRounding.ToPositiveInfinity);
+    // }
 
-    internal const int BITS_PER_IPV4_ADDRESS = 32;
+    // const int BITS_PER_IPV4_ADDRESS = 32;
+
+    const int RESERVED_ADDRESS_COUNT = 2;
+
+    uint addressesToReserve() => Size + RESERVED_ADDRESS_COUNT;
+
+    // static uint addressesNeededToReserve(uint hostCount) =>
+    //     hostCount + RESERVED_ADDRESS_COUNT - 1;
+
+    // static void watafa() {
+    // System.Numerics.BitOperations.RoundUpToPowerOf2()
+
+    // }
+
+    uint maxIndexInSubnet() => addressesToReserve() - 1;
 
     public int PrefixLength
     {
-        get => BITS_PER_IPV4_ADDRESS - closestPow2(Size + 2);
+        get => BitOperations.LeadingZeroCount(maxIndexInSubnet());
     }
 
     public static SubnetDescription Parse(string s)
     {
         // var pair = s.Split(':');
-        return s.Split(':') switch
+        switch (s.Split(':'))
         {
-            [string name, string size] =>
-                new SubnetDescription(name, int.Parse(size)),
-            _ =>
-                throw new FormatException($"Invalid subnetwork description: {s}"),
-        };
+            case [string name, string size]:
+                return new SubnetDescription(name, uint.Parse(size));
+            default:
+                throw new FormatException($"Invalid subnetwork description: {s}");
+        }
+        ;
 
         // if (pair.Length != 2)
     }
+
+    public override string ToString() => $"{Name}: {Size}";
 }
