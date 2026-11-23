@@ -1,9 +1,30 @@
+using System.Collections;
+using System.Collections.Specialized;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Numerics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using LabeledNetwork = (string Name, System.Net.IPNetwork Network);
+// using LabeledNetwork = (string Name, System.Net.IPNetwork Network);
+
+// class DomainSpecificNames : JsonNamingPolicy
+// {
+//     public override string ConvertName(string name)
+//     {
+//         if (name == "Value")
+//     }
+// }
+
+class IPNetworkToString : JsonConverter<IPNetwork>
+{
+    public override IPNetwork Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        => IPNetwork.Parse(reader.GetString()!);
+
+    public override void Write(Utf8JsonWriter writer, IPNetwork value, JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.ToString());
+}
+
 
 class Program
 {
@@ -20,10 +41,15 @@ class Program
             orderby desc.Size descending
             select desc;
 
-        Calculate(mainNetwork, [.. subnets]);
+        Calculate(mainNetwork, new Queue<SubnetDescription>(subnets));
     }
 
-    static void Calculate(IPNetwork mainNetwork, SubnetDescription[] subnets)
+    static readonly JsonSerializerOptions jsonOpts = new()
+    {
+        WriteIndented = true
+    };
+
+    static void Calculate(IPNetwork mainNetwork, Queue<SubnetDescription> subnets)
     {
         foreach (var s in subnets)
         {
@@ -35,12 +61,59 @@ class Program
 
         // mainNetwork.PrefixLength
 
-        LabeledNetwork root = ("root", mainNetwork);
+        // var root = new LabeledNetwork("root", mainNetwork);
+        // string[] root = ["root", mainNetwork.ToString()];
 
-        var networkTree = new BinaryTree<LabeledNetwork?>
+        // var networkTree = new BinaryTree<string[]?> // <LabeledNetwork?>
+        // {
+        //     Value = root
+        // };
+
+        var networkTree = new SubnetBinaryTree
         {
-            Value = root
+            Label = "root",
+            Address = mainNetwork,
         };
+
+        // var cursor = networkTree;
+
+        var todo = new Queue<SubnetBinaryTree>();
+
+        todo.Enqueue(networkTree);
+
+        var cur = subnets.Dequeue();
+
+        // if (cur.PrefixLength == mainNetwork.PrefixLength)
+
+        // foreach (var subnet in subnets)
+        // {
+        //     // if (subnet.PrefixLength == todo.TryPeek)
+        // }
+
+        while (todo.TryDequeue(out var cursor))
+        {
+            var bytes = cursor.Address.BaseAddress.GetAddressBytes();
+
+            // Console.WriteLine(string.Join(", ", new BitArray(bytes)));
+
+            // new Span();
+
+            // cursor.Address.BaseAddress.TryWriteBytes(bytes, out var _);
+
+            // Console.WriteLine(BitConverter.ToInt32(leftAddress));
+
+            // BitConverter.IsLittleEndian = false;
+
+            // new BitConverter();
+
+            // BitConverter.TryWriteBytes()
+
+            // var left = new SubnetBinaryTree {
+            //     Label = "unused",
+            //     Address = 
+            // }
+            // todo.Enqueue(new SubnetBinaryTree)
+        }
 
         // new JsonSerializerOptions{  }
 
@@ -48,9 +121,10 @@ class Program
         // Console.WriteLine(typeof(BinaryTree<LabeledNetwork?>));
 
         var repr = JsonSerializer.Serialize(
-            networkTree
+            networkTree,
             // typeof(BinaryTree<LabeledNetwork?>),
             // JsonContext.Default
+            jsonOpts
         );
 
         // Console.WriteLine()
@@ -65,18 +139,31 @@ class Program
 // [JsonSerializable(typeof(IPNetwork))]
 // partial class JsonContext : JsonSerializerContext;
 
-class BinaryTree<T>
+// record LabeledNetwork(string Label, IPNetwork Network);
+
+// class BinaryTree<T>
+// {
+//     [JsonInclude]
+//     public required T Value;
+
+//     [JsonInclude]
+//     public BinaryTree<T>? Left = null, Right = null;
+
+//     // public BinaryTree(T value) => Value = value;
+// }
+
+internal class SubnetBinaryTree
 {
     [JsonInclude]
-    public required T Value;
+    public required string Label;
 
     [JsonInclude]
-    public BinaryTree<T>? Left = null, Right = null;
+    [JsonConverter(typeof(IPNetworkToString))]
+    public required IPNetwork Address;
 
-    // public BinaryTree(T value) => Value = value;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    SubnetBinaryTree? Left, Right;
 }
-
-
 
 internal record struct SubnetDescription(string Name, uint Size)
 {

@@ -1,10 +1,30 @@
-class ArgumentError extends Error {};
+class ArgumentError extends Error { };
 
 const BITS_PER_IPV4_ADDRESS = 32;
 
-type IpAddress = {
-    octets: [number, number, number, number],
-    maskLength: number,
+class IPNetwork {
+    octets: [number, number, number, number];
+    prefixLength: number;
+
+    get suffixLength(): number {
+        return BITS_PER_IPV4_ADDRESS - this.prefixLength;
+    }
+
+    constructor(octets: [number, number, number, number], maskLength: number) {
+        this.octets = octets;
+        this.prefixLength = maskLength;
+    }
+
+    asInt32(): number {
+        let result = 0;
+
+        for (const byte of this.octets) {
+            result |= byte;
+            result << 8;
+        }
+
+        return result;
+    }
 }
 
 // type IpAddress = [number, number, number, number];
@@ -46,8 +66,14 @@ class Subnet {
     }
 }
 
+interface BinaryTree<T> {
+    value: T;
+    left: BinaryTree<T> | null;
+    right: BinaryTree<T> | null;
+}
+
 // function parseIPv4(s: string): [number, number, number, number, number] {
-function parseIPv4(s: string): IpAddress | null {
+function parseIPv4(s: string): IPNetwork | null {
     const int = "(\\d+)";
     const dot = "\\.";
 
@@ -55,7 +81,7 @@ function parseIPv4(s: string): IpAddress | null {
 
     const match = s.match('^' + re + '$');
 
-    if (!match)
+    if (match === null)
         return null;
 
     // const _full = match.shift();
@@ -68,12 +94,12 @@ function parseIPv4(s: string): IpAddress | null {
     const [, maskLengthStr, ...octetStrs] = match;
 
     const maskLength = Number(maskLengthStr);
-    const octets = octetStrs.map(Number);
+    const octets = octetStrs.map(Number) as [number, number, number, number];
 
     if (octets.length != 4)
         throw new ArgumentError();
 
-    return { octets, maskLength };
+    return new IPNetwork(octets, maskLength);
 }
 
 function parseSubnetDesc(desc: string): Subnet {
@@ -91,23 +117,18 @@ function parseSubnetDesc(desc: string): Subnet {
     );
 }
 
-function parseArgs(argv: string[]): [IpAddress, Subnet[]] {
+function parseArgs(argv: string[]): [IPNetwork, Subnet[]] {
     const args = argv.toSpliced(0, 2);
-
-    // // const ip = args.shift();
-    // // const subnets = args.map(Number);
-
-    const [ip, ...subnetDescs] = args;
-
-    // subnets = subnets.map(Number);
-
-    const subnets = subnetDescs.map(desc => parseSubnetDesc(desc));
 
     const [networkStr, ...subnetStrs] = args;
 
+    const subnets = subnetStrs.map(desc => parseSubnetDesc(desc));
+
+    // const [networkStr, ...subnetStrs] = args;
+
     console.debug(subnetStrs);
 
-    if (!networkStr) {
+    if (networkStr === undefined) {
         throw new ArgumentError("No toplevel network specified");
     }
 
@@ -116,9 +137,8 @@ function parseArgs(argv: string[]): [IpAddress, Subnet[]] {
 
     const network = parseIPv4(networkStr);
 
-    if (!network)
+    if (network === null)
         throw new ArgumentError("Invalid IPv4 address");
-
 
     return [network, subnets];
 }
@@ -129,41 +149,6 @@ function closestPow2(x: number): number {
 }
 
 function main() {
-    
-    // node, .js
-
-
-    // let parts = network.split('/');
-
-    // if 
-
-
-    // let it = network.matchAll(re);
-
-    // console.log(it);
-
-    // console.log(match[1]);
-
-    // const [...octets, maskLength] = match;
-
-    // const octets = match.slice(1, 5)
-
-    // function roundUpToPow2(x: number): number {
-
-
-    //     return 2 ** bits;
-    // }
-
-    // for (const ss of subnetSizes) {
-    //     // account reserved addresses: all-0 and all-1
-    //     const it = roundUpToPow2(ss + 2);
-    //     console.log(it);
-    // }
-
-    // console.debug([...subnetSizes.entries()]);
-
-    // const subnets = new Map();
-
     const [network, subnets] = parseArgs(process.argv);
 
     subnets.sort((a, b) => a.maskLength - b.maskLength);
@@ -172,10 +157,13 @@ function main() {
         throw new ArgumentError("No subnets specified");
 
     // network.size < subnets[0].size
-    if (network.maskLength > subnets[0].maskLength)
+    if (network.prefixLength > subnets[0].maskLength)
         throw new ArgumentError("Subnetwork too big");
 
-    
+    // let { maskLength } = network;
+
+    const tree = { value: network };
+
 
 
     // for (const net of subnets) {
@@ -188,7 +176,7 @@ function main() {
     // letters.forEach((letter, index)  )
 
     // if (subnetSizes.length > letters.length)
-        // throw new ArgumentError("Can't assign ");
+    // throw new ArgumentError("Can't assign ");
 
     // const maskSizes = subnets
     // .map(size => closestPow2(size + 2));
