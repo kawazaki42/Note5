@@ -15,6 +15,28 @@ class IPNetwork {
         this.prefixLength = maskLength;
     }
 
+    static parse(s: string): IPNetwork | null {
+        const int = "(\\d+)";
+        const dot = "\\.";
+
+        const re = [int, int, int, int].join(dot) + '/' + int;
+
+        const match = s.match('^' + re + '$');
+
+        if (match === null)
+            return null;
+
+        const [, maskLengthStr, ...octetStrs] = match;
+
+        const maskLength = Number(maskLengthStr);
+        const octets = octetStrs.map(Number) as [number, number, number, number];
+
+        if (octets.length != 4)
+            throw new ArgumentError();
+
+        return new IPNetwork(octets, maskLength);
+    }
+
     asInt32(): number {
         let result = 0;
 
@@ -27,27 +49,6 @@ class IPNetwork {
     }
 }
 
-// type IpAddress = [number, number, number, number];
-
-// class Network {
-//     ipAddress: IpAddress;
-//     maskLength: number;
-
-//     constructor(ipAddress: IpAddress, maskLength: number) {
-//         this.ipAddress = ipAddress;
-//         this.maskLength = maskLength;
-//     }
-
-//     get size() {
-//         return 2 ** (BITS_PER_IPV4_ADDRESS - this.maskLength);
-//     }
-// }
-
-// type Subnet = {
-//     name: string,
-//     size: number,
-// }
-
 class Subnet {
     name: string;
     size: number;
@@ -55,6 +56,21 @@ class Subnet {
     constructor(name: string, size: number) {
         this.name = name;
         this.size = size;
+    }
+
+    static parse(desc: string): Subnet {
+        const [name, size] = desc.split(':');
+
+        if (name === undefined)
+            throw new ArgumentError("No subnet name specified (should be name:size)");
+
+        if (size === undefined)
+            throw new ArgumentError("No subnet size specified (should be name:size)");
+
+        return new Subnet(
+            name,
+            Number(size),
+        );
     }
 
     get bitLength(): number {
@@ -72,57 +88,12 @@ interface BinaryTree<T> {
     right: BinaryTree<T> | null;
 }
 
-// function parseIPv4(s: string): [number, number, number, number, number] {
-function parseIPv4(s: string): IPNetwork | null {
-    const int = "(\\d+)";
-    const dot = "\\.";
-
-    const re = [int, int, int, int].join(dot) + '/' + int;
-
-    const match = s.match('^' + re + '$');
-
-    if (match === null)
-        return null;
-
-    // const _full = match.shift();
-
-    // const maskLength = Number(match.pop());
-
-    // danger
-    // const octets = match.map(Number) as [number, number, number, number];
-
-    const [, maskLengthStr, ...octetStrs] = match;
-
-    const maskLength = Number(maskLengthStr);
-    const octets = octetStrs.map(Number) as [number, number, number, number];
-
-    if (octets.length != 4)
-        throw new ArgumentError();
-
-    return new IPNetwork(octets, maskLength);
-}
-
-function parseSubnetDesc(desc: string): Subnet {
-    const [name, size] = desc.split(':');
-
-    if (name === undefined)
-        throw new ArgumentError("No subnet name specified (should be name:size)");
-
-    if (size === undefined)
-        throw new ArgumentError("No subnet size specified (should be name:size)");
-
-    return new Subnet(
-        name,
-        Number(size),
-    );
-}
-
 function parseArgs(argv: string[]): [IPNetwork, Subnet[]] {
     const args = argv.toSpliced(0, 2);
 
     const [networkStr, ...subnetStrs] = args;
 
-    const subnets = subnetStrs.map(desc => parseSubnetDesc(desc));
+    const subnets = subnetStrs.map(desc => Subnet.parse(desc));
 
     // const [networkStr, ...subnetStrs] = args;
 
@@ -135,7 +106,7 @@ function parseArgs(argv: string[]): [IPNetwork, Subnet[]] {
     if (subnetStrs.length < 1)
         throw new ArgumentError("No subnetwork sizes specified");
 
-    const network = parseIPv4(networkStr);
+    const network = IPNetwork.parse(networkStr);
 
     if (network === null)
         throw new ArgumentError("Invalid IPv4 address");
