@@ -1,9 +1,9 @@
 use std::io::Write;
 use std::path::Path;
 
-use cache_model::Cache;
-use cache_model::rand::create_random_pagefile;
-use cache_model::{BANK_SIZE, LINE_SIZE, PAGE_SIZE};
+use cache_sim::Cache;
+use cache_sim::rand::create_random_pagefile;
+use cache_sim::{BANK_SIZE, LINE_SIZE, PAGE_SIZE};
 
 use clap::Parser;
 use clap::Subcommand;
