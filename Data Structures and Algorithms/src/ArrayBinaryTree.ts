@@ -15,20 +15,17 @@ export default class ArrayBinaryTree<T> {
         return;
       }
 
-      if (element < other)
-        index = ArrayBinaryTree.leftChildOf(index);
-      else
-        index = ArrayBinaryTree.rightChildOf(index);
+      if (element < other) index = ArrayBinaryTree.leftChildOf(index);
+      else index = ArrayBinaryTree.rightChildOf(index);
     }
   }
 
   delete(element: T): void {
     // let index = 0;
-    
+
     const index = this.flatData.indexOf(element);
-    
-    if (index === -1)
-      return;
+
+    if (index === -1) return;
 
     const result = new ArrayBinaryTree<T>();
 
@@ -36,8 +33,7 @@ export default class ArrayBinaryTree<T> {
 
     for (let i = index + 1; i < this.flatData.length; i++) {
       const item = this.flatData[i];
-      if (item !== undefined)
-        result.insert(item);
+      if (item !== undefined) result.insert(item);
     }
 
     this.flatData = result.flatData;
@@ -48,7 +44,7 @@ export default class ArrayBinaryTree<T> {
 
     const choices = [this.leftChildOf, this.rightChildOf];
 
-    path.forEach(dir => result = choices[dir]!(result));
+    path.forEach((dir) => (result = choices[dir]!(result)));
 
     return result;
   }

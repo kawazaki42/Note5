@@ -46,8 +46,8 @@ const toc = {
     const tree = sample();
 
     console.debug(tree.search(3));
-  }
-}
+  },
+};
 
 for (const [feature, action] of Object.entries(toc)) {
   console.log(feature);

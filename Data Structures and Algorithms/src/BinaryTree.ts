@@ -8,7 +8,6 @@ export interface DeepTraverseOptions {
 export type Action<T> = (element: T) => void;
 
 export default abstract class BinaryTree<T> {
-
   // abstract iterator(): Iterable<T>;
 
   abstract traverseDeep(

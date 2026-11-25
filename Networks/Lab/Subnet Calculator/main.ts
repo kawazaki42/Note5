@@ -11,8 +11,20 @@ class IPNetwork {
     }
 
     constructor(octets: [number, number, number, number], maskLength: number) {
+        // if (typeof(octets) === 'number')
+            
+
         this.octets = octets;
         this.prefixLength = maskLength;
+    }
+
+    static fromInt32(int: number): [number, number, number, number] {
+        return [
+            (int & 0xff00_0000) >>> 24,
+            (int & 0x00ff_0000) >>> 16,
+            (int & 0x0000_ff00) >>> 8,
+            (int & 0x0000_00ff),
+        ];
     }
 
     static parse(s: string): IPNetwork | null {
@@ -26,7 +38,11 @@ class IPNetwork {
         if (match === null)
             return null;
 
-        const [, maskLengthStr, ...octetStrs] = match;
+        const _full = match.shift();
+        const maskLengthStr = match.pop();
+        const octetStrs = match;
+
+        // const [, maskLengthStr, ...octetStrs] = match;
 
         const maskLength = Number(maskLengthStr);
         const octets = octetStrs.map(Number) as [number, number, number, number];
@@ -41,12 +57,39 @@ class IPNetwork {
         let result = 0;
 
         for (const byte of this.octets) {
+            result <<= 8;
             result |= byte;
-            result << 8;
         }
 
         return result;
     }
+
+    // bisectLeft(): IPNetwork {
+    //     return new IPNetwork(this.octets, this.prefixLength + 1);
+    // }
+
+    // bisectRight(): IPNetwork {
+    //     const left = this.bisectLeft()
+    // }
+
+    bisect(): [IPNetwork, IPNetwork] {
+        const left = new IPNetwork(this.octets, this.prefixLength + 1);
+
+        const int = this.asInt32() | (1 << left.suffixLength);
+        const rightBytes = IPNetwork.fromInt32(int);
+        const right = new IPNetwork(rightBytes, left.prefixLength);
+
+        return [left, right];
+    }
+
+    // bisect(direction: boolean): IPNetwork {
+    //     // if (!direction)
+    //     //     return new IPNetwork(this.octets, this.prefixLength + 1);
+
+    //     const int = this.asInt32() | (1 << (this.suffixLength - 1));
+    //     console.assert(int !== this.asInt32());
+
+    // }
 }
 
 class Subnet {
@@ -82,10 +125,14 @@ class Subnet {
     }
 }
 
-interface BinaryTree<T> {
+class BinaryTree<T> {
     value: T;
-    left: BinaryTree<T> | null;
-    right: BinaryTree<T> | null;
+    left: BinaryTree<T> | null = null;
+    right: BinaryTree<T> | null = null;
+
+    constructor(value: T) {
+        this.value = value;
+    }
 }
 
 function parseArgs(argv: string[]): [IPNetwork, Subnet[]] {
@@ -97,7 +144,7 @@ function parseArgs(argv: string[]): [IPNetwork, Subnet[]] {
 
     // const [networkStr, ...subnetStrs] = args;
 
-    console.debug(subnetStrs);
+    // console.debug(subnetStrs);
 
     if (networkStr === undefined) {
         throw new ArgumentError("No toplevel network specified");
@@ -127,15 +174,91 @@ function main() {
     if (subnets[0] === undefined)
         throw new ArgumentError("No subnets specified");
 
+    // debugger;
+
     // network.size < subnets[0].size
-    if (network.prefixLength > subnets[0].maskLength)
+    if (network.prefixLength >= subnets[0].maskLength)
         throw new ArgumentError("Subnetwork too big");
 
     // let { maskLength } = network;
 
-    const tree = { value: network };
+    // const tree: {
+    //     network: IPNetwork,
+    //     assigned: Subnet | null,
+    //     left
+    // } = { network, assigned: null };
+
+    // const tree: BinaryTree<[IPNetwork, Subnet | null]> = new BinaryTree([network, null]);
+    // {
+    //     value: [network, null],
+    //     left: null,
+    //     right: null,
+    // };
+
+    // let todo = [tree];
+    // let task: Subnet;
+    // let arrayTree: [IPNetwork, Subnet | null][] = [[network, null]]
+    let arrayTree: [{
+        network: IPNetwork,
+        task: Subnet | 'unused' | null,
+    }] = [{
+        network,
+        task: null,
+    }];
+    
+    let i = 0;
+    // for (let i = 0;; i++) {
+
+    for (const task of subnets) {
+        while (true) {
+            const [left, right] = arrayTree[i]!.network.bisect();
+            arrayTree.push({network: left, task: null});
+            arrayTree.push({network: right, task: null});
+
+            arrayTree[i]!.task = 'unused';
+
+            // arrayTree.push([right, null]);
+    
+            // JSON.stringify(1, null, )
+            i++;
+
+            if (
+                arrayTree[i]!.network.prefixLength === task.maskLength
+                && arrayTree[i]!.task === null
+            ) break;
+        }
+        
+        arrayTree[i]!.task = task;
 
 
+    }
+
+
+    // while ((task = subnets.shift()) !== undefined)
+    // while (true) {
+    //     const task = subnets.shift();
+
+    //     if (task === undefined)
+    //         break;
+
+    //     for (const node of todo) {
+    //         const [left, right] = node.value[0].bisect();
+    //         node.left = new BinaryTree([left, null]);
+    //         node.right = new BinaryTree([right, null]);
+
+    //         todo.push(node.left, node.right);
+
+    //         if (node.value[0].prefixLength === task.maskLength) {
+    //             node.value[1] = task;
+    //         }
+    //         // break;
+    //     }
+    // }
+    
+    // console.debug(Bun.YAML.stringify(tree, null, 2));
+    // console.debug(JSON.stringify(tree, null, 2))
+    console.debug(JSON.stringify(arrayTree, null, 2))
+    // console.debug(tree);
 
     // for (const net of subnets) {
     //     if net

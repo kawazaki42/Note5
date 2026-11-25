@@ -1,30 +1,29 @@
 // import { describe, test } from 'bun:test';
-import LinkedListNode, { LinkedListIterator } from './LinkedList';
+import LinkedListNode, { LinkedListIterator } from "./LinkedList";
 
 function sample() {
-    const head = new LinkedListNode(1);
-    head.next = new LinkedListNode(2);
-    head.next.next = new LinkedListNode(3);
-    return head;
+  const head = new LinkedListNode(1);
+  head.next = new LinkedListNode(2);
+  head.next.next = new LinkedListNode(3);
+  return head;
 }
 
 // describe('linked list iterator', () => {
-    const iter = new LinkedListIterator(sample());
+const iter = new LinkedListIterator(sample());
 
-    let cur;
+let cur;
 
-    while(cur = iter.next()) {
-        console.log(cur);
+while ((cur = iter.next())) {
+  console.log(cur);
 
-        if (cur === 2)
-            break;
-    }
+  if (cur === 2) break;
+}
 
-    iter.reset();
+iter.reset();
 
-    while(cur = iter.next()) {
-        console.log(cur);
-    }
+while ((cur = iter.next())) {
+  console.log(cur);
+}
 
-    console.log(iter.nthAbsolute(1));
+console.log(iter.nthAbsolute(1));
 // })
