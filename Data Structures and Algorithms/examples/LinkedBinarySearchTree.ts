@@ -1,5 +1,5 @@
 import LinkedBinarySearchTree from "../src/LinkedBinarySearchTree.ts";
-import { describe, it, expect } from "bun:test";
+// import { describe, it, expect } from "bun:test";
 
 function sample(): LinkedBinarySearchTree<number> {
   const tree = new LinkedBinarySearchTree<number>();
@@ -17,8 +17,8 @@ function dumpYaml<T>(tree: LinkedBinarySearchTree<T>): void {
   console.debug(debugString);
 }
 
-describe("linked binary search tree", () => {
-  it("inserts", () => {
+const toc = {
+  insert() {
     // expect(sample).not.toThrow();
 
     const tree = sample();
@@ -32,19 +32,57 @@ describe("linked binary search tree", () => {
     // Bun.stderr.
     // Bun.write
     // Blob
-  });
+  },
 
-  it("deletes", () => {
+  delete() {
     const tree = sample();
 
     tree.delete(5);
 
     dumpYaml(tree);
-  });
+  },
 
-  it("searches", () => {
+  search() {
     const tree = sample();
 
     console.debug(tree.search(3));
-  });
-});
+  }
+}
+
+for (const [feature, action] of Object.entries(toc)) {
+  console.log(feature);
+  action();
+  console.log();
+}
+
+// describe("linked binary search tree", () => {
+//   it("inserts", () => {
+//     // expect(sample).not.toThrow();
+
+//     const tree = sample();
+
+//     // console.debug(root.flattenBroad({}));
+//     // console.debug(tree);
+//     // console.debug(JSON.stringify(root));
+
+//     dumpYaml(tree);
+
+//     // Bun.stderr.
+//     // Bun.write
+//     // Blob
+//   });
+
+//   it("deletes", () => {
+//     const tree = sample();
+
+//     tree.delete(5);
+
+//     dumpYaml(tree);
+//   });
+
+//   it("searches", () => {
+//     const tree = sample();
+
+//     console.debug(tree.search(3));
+//   });
+// });
