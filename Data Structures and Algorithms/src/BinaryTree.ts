@@ -3,9 +3,14 @@ export interface DeepTraverseOptions {
   putParentAt?: 0 | 1 | 2;
 }
 
+// export interface BinaryTreeIteratorOptions
+
 export type Action<T> = (element: T) => void;
 
 export default abstract class BinaryTree<T> {
+
+  // abstract iterator(): Iterable<T>;
+
   abstract traverseDeep(
     options: DeepTraverseOptions & {
       action: Action<T>;

@@ -1,11 +1,41 @@
 import BinaryTree from "./BinaryTree.ts";
 import type { Action, DeepTraverseOptions } from "./BinaryTree.ts";
 
-export default class ArrayBinaryTree<T> extends BinaryTree<T> {
+// export default class ArrayBinaryTree<T> extends BinaryTree<T> {
+export default class ArrayBinaryTree<T> {
   flatData = [];
 
   static leftChildOf = (index: number) => index * 2 + 1;
   static rightChildOf = (index: number) => index * 2 + 2;
+
+  // *deepTraverseIterator<T>({
+  //   inverseHorizontal,
+  //   putParentAt,
+  //   // action,
+  //   // startAt: index,
+  // }: DeepTraverseOptions & {
+  //   // action: Action<T>;
+  //   // startAt: number;
+  // }) {
+  //   // yield this.flatData[0];
+  //   let i = 0;
+  //   let item = this.flatData[i];
+
+  //   if (item === undefined)
+  //     return;
+
+  //   yield item;
+  // }
+
+  // *broadTraverseIterator<T>({
+  //   inverseHorizontal,
+  //   inverseVertical
+  // }: {
+  //   inverseHorizontal: boolean,
+  //   inverseVertical: boolean,
+  // }) {
+
+  // }
 
   override traverseDeep({
     inverseHorizontal,
