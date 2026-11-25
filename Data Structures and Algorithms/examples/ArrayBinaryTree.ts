@@ -7,6 +7,8 @@ const result = [4, 2, 1, 3, 6, 5, 7, 8, 9].forEach(it => tree.insert(it));
 // console.log(tree.flatData);
 
 showLayered(tree);
+console.log(tree.followPath([]));
+console.log(tree.followPath([1, 0]));
 
 tree.delete(6);
 

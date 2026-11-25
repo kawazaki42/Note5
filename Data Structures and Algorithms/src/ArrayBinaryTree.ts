@@ -1,6 +1,3 @@
-import BinaryTree from "./BinaryTree.ts";
-import type { Action, DeepTraverseOptions } from "./BinaryTree.ts";
-
 export default class ArrayBinaryTree<T> {
   flatData: T[] = [];
 
@@ -44,25 +41,19 @@ export default class ArrayBinaryTree<T> {
     }
 
     this.flatData = result.flatData;
+  }
 
-    // while (true) {
-    //   const other = this.flatData[index];
+  static pathToIdx(path: (0 | 1)[]) {
+    let result = 0;
 
-    //   // if (other === undefined || other === null) {
-    //   //   continue;
-    //   // }
+    const choices = [this.leftChildOf, this.rightChildOf];
 
-    //   // if (other === element) {
-    //   //   delete this.flatData[index];
-    //   //   return;
-    //   // } else {
+    path.forEach(dir => result = choices[dir]!(result));
 
-    //   // }
+    return result;
+  }
 
-    //   if (element < other)
-    //     index = ArrayBinaryTree.leftChildOf(index);
-    //   else
-    //     index = ArrayBinaryTree.rightChildOf(index);
-    // }
+  followPath(path: (0 | 1)[]): T | undefined {
+    return this.flatData[ArrayBinaryTree.pathToIdx(path)];
   }
 }
