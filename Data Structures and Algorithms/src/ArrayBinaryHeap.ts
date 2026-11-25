@@ -7,40 +7,27 @@ function present<T>(it: T | null | undefined) {
 export default class ArrayBinaryHeap<T> {
   flatData: T[] = [];
 
+  // a path in this tree must always be an increasing sequence
   insert(newElement: T): void {
     this.flatData.push(newElement);
-
-    // a path in this tree must always be an increasing sequence
-
-    // let newIdx = this.flatData.length - 1;
 
     const newNode: ArrayTreeNode<T> = {
       index: this.flatData.length - 1,
       value: newElement,
-    }
+    };
 
     while (true) {
-
-      // const parentIdx = R.parent(newIdx);
-      // const parentData = this.flatData[parentIdx];
       const parent = this.parentOf(newNode.index);
 
-      // if (parent === -1)
       if (!present(parent.value)) return;
 
       if (newNode.value! < parent.value) {
         this.swap(parent, newNode);
-        // swap; move the min value closer to root
-        // this.flatData[parent.index] = newNode.value!;
-        // this.flatData[newNode.index] = parent.value;
-
-        // newNode.index = parent.index;
       } else return;
     }
   }
 
   popRoot(): T | null {
-    // const substVal = this.flatData.pop();
     const substitute: ArrayTreeNode<T> = {
       index: 0,
       value: this.flatData.pop(),
@@ -50,32 +37,20 @@ export default class ArrayBinaryHeap<T> {
 
     if (!present(substitute.value) || !present(saved)) return null;
 
-    // let curIdx = 0;
-    this.flatData[substitute.index] = substitute.value!;
+    this.flatData[substitute.index] = substitute.value;
 
-    // downLevel:
     while (true) {
-      const [left, right] = this.childrenOf(substitute.index);
-
       let min = substitute;
-      // if (!present(min.value))
-      //     throw Error("пэпэ шнэйнэ втфа?");
 
-      for (const child of [left, right]) {
+      for (const child of this.childrenOf(substitute.index)) {
         if (present(child.value) && child.value < min.value!) {
-          // substitute.index = child.index;
           min = child;
-          // continue downLevel;
         }
       }
 
       // if we're already minimum
       if (substitute.value <= min.value!) return saved;
 
-      // this.flatData[min.index] = substitute.value;
-      // this.flatData[substitute.index] = min.value!;
-
-      // substitute.index = min.index;
       this.swap(substitute, min);
     }
   }
