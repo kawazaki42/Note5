@@ -7,33 +7,50 @@ function present<T>(it: T | null | undefined) {
 export default class ArrayBinaryHeap<T> {
   flatData: T[] = [];
 
+  private parent(index: number): ArrayTreeNode<T> {
+    const parentIdx = R.parent(index);
+    const value = this.flatData[parentIdx];
+
+    return {
+      index: parentIdx,
+      value,
+    };
+  }
+
   insert(newElement: T): void {
     this.flatData.push(newElement);
 
     // a path in this tree must always be an increasing sequence
 
-    let newIdx = this.flatData.length - 1;
+    // let newIdx = this.flatData.length - 1;
+
+    const newNode: ArrayTreeNode<T> = {
+      index: this.flatData.length - 1,
+      value: newElement,
+    }
 
     while (true) {
-      const parentIdx = R.parent(newIdx);
-      const parentData = this.flatData[parentIdx];
+
+      // const parentIdx = R.parent(newIdx);
+      // const parentData = this.flatData[parentIdx];
+      const parent = this.parent(newNode.index);
 
       // if (parent === -1)
-      if (parentData === undefined || parentData === null) return;
+      if (!present(parent.value)) return;
 
-      if (newElement < parentData) {
-        // swap
-        this.flatData[parentIdx] = newElement;
-        this.flatData[newIdx] = parentData;
+      if (newNode.value! < parent.value) {
+        // swap; move the min value closer to root
+        this.flatData[parent.index] = newNode.value!;
+        this.flatData[newNode.index] = parent.value;
 
-        newIdx = parentIdx;
+        newNode.index = parent.index;
       } else return;
     }
   }
 
   popRoot(): T | null {
     // const substVal = this.flatData.pop();
-    const substitute: ChildInfo<T> = {
+    const substitute: ArrayTreeNode<T> = {
       index: 0,
       value: this.flatData.pop(),
     };
@@ -61,7 +78,7 @@ export default class ArrayBinaryHeap<T> {
         }
       }
 
-      // if both children's data is greater
+      // if we're already minimum
       if (substitute.value <= min.value!) return saved;
 
       this.flatData[min.index] = substitute.value;
@@ -81,7 +98,7 @@ export default class ArrayBinaryHeap<T> {
     }
   }
 
-  private children(idx: number): [ChildInfo<T>, ChildInfo<T>] {
+  private children(idx: number): [ArrayTreeNode<T>, ArrayTreeNode<T>] {
     const leftIdx = R.leftChildOf(idx);
     const rightIdx = R.rightChildOf(idx);
 
@@ -101,7 +118,7 @@ export default class ArrayBinaryHeap<T> {
   }
 }
 
-type ChildInfo<T> = {
+type ArrayTreeNode<T> = {
   index: number;
   value: T | undefined;
 };
