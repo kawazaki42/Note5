@@ -43,7 +43,7 @@ export default class ArrayBinarySearchTree<T> {
 
     const choices = [
       ArrayTreeRelatives.leftChildOf,
-      ArrayTreeRelatives.rightChildOf
+      ArrayTreeRelatives.rightChildOf,
     ];
 
     path.forEach((dir) => (result = choices[dir]!(result)));
