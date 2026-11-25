@@ -1,4 +1,4 @@
-export default class ArrayBinaryTree<T> {
+export default class ArrayBinarySearchTree<T> {
   flatData: T[] = [];
 
   static leftChildOf = (index: number) => index * 2 + 1;
@@ -15,8 +15,8 @@ export default class ArrayBinaryTree<T> {
         return;
       }
 
-      if (element < other) index = ArrayBinaryTree.leftChildOf(index);
-      else index = ArrayBinaryTree.rightChildOf(index);
+      if (element < other) index = ArrayBinarySearchTree.leftChildOf(index);
+      else index = ArrayBinarySearchTree.rightChildOf(index);
     }
   }
 
@@ -27,7 +27,7 @@ export default class ArrayBinaryTree<T> {
 
     if (index === -1) return;
 
-    const result = new ArrayBinaryTree<T>();
+    const result = new ArrayBinarySearchTree<T>();
 
     result.flatData = this.flatData.slice(0, index);
 
@@ -50,6 +50,6 @@ export default class ArrayBinaryTree<T> {
   }
 
   followPath(path: (0 | 1)[]): T | undefined {
-    return this.flatData[ArrayBinaryTree.pathToIdx(path)];
+    return this.flatData[ArrayBinarySearchTree.pathToIdx(path)];
   }
 }
