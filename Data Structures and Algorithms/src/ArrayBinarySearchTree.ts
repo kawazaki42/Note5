@@ -1,8 +1,7 @@
+import { ArrayTreeRelatives } from "./ArrayTree";
+
 export default class ArrayBinarySearchTree<T> {
   flatData: T[] = [];
-
-  static leftChildOf = (index: number) => index * 2 + 1;
-  static rightChildOf = (index: number) => index * 2 + 2;
 
   insert(element: T): void {
     let index = 0;
@@ -15,8 +14,8 @@ export default class ArrayBinarySearchTree<T> {
         return;
       }
 
-      if (element < other) index = ArrayBinarySearchTree.leftChildOf(index);
-      else index = ArrayBinarySearchTree.rightChildOf(index);
+      if (element < other) index = ArrayTreeRelatives.leftChildOf(index);
+      else index = ArrayTreeRelatives.rightChildOf(index);
     }
   }
 
@@ -42,7 +41,10 @@ export default class ArrayBinarySearchTree<T> {
   static pathToIdx(path: (0 | 1)[]) {
     let result = 0;
 
-    const choices = [this.leftChildOf, this.rightChildOf];
+    const choices = [
+      ArrayTreeRelatives.leftChildOf,
+      ArrayTreeRelatives.rightChildOf
+    ];
 
     path.forEach((dir) => (result = choices[dir]!(result)));
 
