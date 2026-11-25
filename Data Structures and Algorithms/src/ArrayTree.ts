@@ -10,9 +10,9 @@ export function* layers<T>(flatData: T[]): Generator<T[]> {
 
   while (true) {
     const level = todo.splice(0, take);
-    yield level;
 
     if (level.every((it) => it === undefined)) break;
+    yield level;
 
     take *= 2;
   }

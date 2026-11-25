@@ -1,4 +1,8 @@
-import { ArrayTreeRelatives } from "./ArrayTree";
+import { ArrayTreeRelatives as R } from "./ArrayTree";
+
+function present<T>(it: T | null | undefined) {
+    return it !== null && it !== undefined;
+}
 
 export default class ArrayBinaryHeap<T> {
     flatData: T[] = [];
@@ -7,11 +11,11 @@ export default class ArrayBinaryHeap<T> {
         this.flatData.push(newElement);
 
         // a path in this tree must always be an increasing sequence
-        
-        let newIdx = this.flatData.length -1 ;
+
+        let newIdx = this.flatData.length - 1;
 
         while (true) {
-            const parentIdx = ArrayTreeRelatives.parent(newIdx);
+            const parentIdx = R.parent(newIdx);
             const parentData = this.flatData[parentIdx]
 
             // if (parent === -1)
@@ -22,9 +26,78 @@ export default class ArrayBinaryHeap<T> {
                 // swap
                 this.flatData[parentIdx] = newElement;
                 this.flatData[newIdx] = parentData;
-    
+
                 newIdx = parentIdx;
             } else return;
         }
     }
+
+    popRoot(): T | null {
+        // const substVal = this.flatData.pop();
+        const substitute: ChildInfo<T> = {
+            index: 0,
+            value: this.flatData.pop(),
+        };
+
+        const saved = this.flatData[substitute.index];
+
+        if (!present(substitute.value) || !present(saved))
+            return null;
+        
+        // let curIdx = 0;
+        this.flatData[substitute.index] = substitute.value!;
+
+        downLevel:
+        while (true) {
+            const [left, right] = this.children(substitute.index);
+
+            for (const child of [left, right]) {
+                if (present(child.value) && child.value < substitute.value) {
+                    this.flatData[child.index] = substitute.value;
+                    this.flatData[substitute.index] = child.value;
+
+                    substitute.index = child.index;
+                    continue downLevel;
+                }
+            }
+
+            // if both children's data is greater
+            return saved;
+        }
+    }
+
+    *sort(): Generator<T> {
+        while (true) {
+            const min = this.popRoot();
+
+            if (min === null)
+                return;
+
+            yield min;
+        }
+    }
+
+    private children(idx: number): [ChildInfo<T>, ChildInfo<T>] {
+        const leftIdx = R.leftChildOf(idx);
+        const rightIdx = R.rightChildOf(idx);
+
+        const left = this.flatData[leftIdx];
+        const right = this.flatData[rightIdx];
+
+        return [
+            {
+                index: leftIdx,
+                value: left,
+            },
+            {
+                index: rightIdx,
+                value: right,
+            },
+        ];
+    }
+}
+
+type ChildInfo<T> = {
+    index: number,
+    value: T | undefined,
 }
