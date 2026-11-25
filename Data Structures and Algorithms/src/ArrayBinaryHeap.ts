@@ -7,16 +7,6 @@ function present<T>(it: T | null | undefined) {
 export default class ArrayBinaryHeap<T> {
   flatData: T[] = [];
 
-  private parent(index: number): ArrayTreeNode<T> {
-    const parentIdx = R.parent(index);
-    const value = this.flatData[parentIdx];
-
-    return {
-      index: parentIdx,
-      value,
-    };
-  }
-
   insert(newElement: T): void {
     this.flatData.push(newElement);
 
@@ -33,7 +23,7 @@ export default class ArrayBinaryHeap<T> {
 
       // const parentIdx = R.parent(newIdx);
       // const parentData = this.flatData[parentIdx];
-      const parent = this.parent(newNode.index);
+      const parent = this.parentOf(newNode.index);
 
       // if (parent === -1)
       if (!present(parent.value)) return;
@@ -64,7 +54,7 @@ export default class ArrayBinaryHeap<T> {
 
     // downLevel:
     while (true) {
-      const [left, right] = this.children(substitute.index);
+      const [left, right] = this.childrenOf(substitute.index);
 
       let min = substitute;
       // if (!present(min.value))
@@ -98,7 +88,25 @@ export default class ArrayBinaryHeap<T> {
     }
   }
 
-  private children(idx: number): [ArrayTreeNode<T>, ArrayTreeNode<T>] {
+  /** make sure that a and b have a value! */
+  private swap(a: ArrayTreeNode<T>, b: ArrayTreeNode<T>): void {
+    this.flatData[a.index] = b.value!;
+    this.flatData[b.index] = a.value!;
+
+    [a.index, b.index] = [b.index, a.index];
+  }
+
+  private parentOf(index: number): ArrayTreeNode<T> {
+    const parentIdx = R.parent(index);
+    const value = this.flatData[parentIdx];
+
+    return {
+      index: parentIdx,
+      value,
+    };
+  }
+
+  private childrenOf(idx: number): [ArrayTreeNode<T>, ArrayTreeNode<T>] {
     const leftIdx = R.leftChildOf(idx);
     const rightIdx = R.rightChildOf(idx);
 
