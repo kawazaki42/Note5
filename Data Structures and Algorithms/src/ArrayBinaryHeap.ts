@@ -29,11 +29,12 @@ export default class ArrayBinaryHeap<T> {
       if (!present(parent.value)) return;
 
       if (newNode.value! < parent.value) {
+        this.swap(parent, newNode);
         // swap; move the min value closer to root
-        this.flatData[parent.index] = newNode.value!;
-        this.flatData[newNode.index] = parent.value;
+        // this.flatData[parent.index] = newNode.value!;
+        // this.flatData[newNode.index] = parent.value;
 
-        newNode.index = parent.index;
+        // newNode.index = parent.index;
       } else return;
     }
   }
@@ -71,10 +72,11 @@ export default class ArrayBinaryHeap<T> {
       // if we're already minimum
       if (substitute.value <= min.value!) return saved;
 
-      this.flatData[min.index] = substitute.value;
-      this.flatData[substitute.index] = min.value!;
+      // this.flatData[min.index] = substitute.value;
+      // this.flatData[substitute.index] = min.value!;
 
-      substitute.index = min.index;
+      // substitute.index = min.index;
+      this.swap(substitute, min);
     }
   }
 
