@@ -47,22 +47,30 @@ export default class ArrayBinaryHeap<T> {
         // let curIdx = 0;
         this.flatData[substitute.index] = substitute.value!;
 
-        downLevel:
+        // downLevel:
         while (true) {
             const [left, right] = this.children(substitute.index);
 
-            for (const child of [left, right]) {
-                if (present(child.value) && child.value < substitute.value) {
-                    this.flatData[child.index] = substitute.value;
-                    this.flatData[substitute.index] = child.value;
+            let min = substitute;
+            // if (!present(min.value))
+            //     throw Error("пэпэ шнэйнэ втфа?");
 
-                    substitute.index = child.index;
-                    continue downLevel;
+            for (const child of [left, right]) {
+                if (present(child.value) && child.value < min.value!) {
+                    // substitute.index = child.index;
+                    min = child;
+                    // continue downLevel;
                 }
             }
 
             // if both children's data is greater
-            return saved;
+            if (substitute.value <= min.value!)
+                return saved;
+
+            this.flatData[min.index] = substitute.value;
+            this.flatData[substitute.index] = min.value!;
+
+            substitute.index = min.index;
         }
     }
 

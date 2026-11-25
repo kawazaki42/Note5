@@ -9,7 +9,13 @@ layers(tree.flatData).forEach(console.log);
 
 // tree.sort().forEach(console.log);
 
+const result = [];
+
 for (const item of tree.sort()) {
-    console.log(item);
+    // console.log(item);
+    result.push(item);
     layers(tree.flatData).forEach(console.log);
+    console.log();
 }
+
+console.log(result);
