@@ -8,6 +8,10 @@ const result = [4, 2, 1, 3, 6, 5, 7, 8, 9].forEach(it => tree.insert(it));
 
 showLayered(tree);
 
+tree.delete(6);
+
+showLayered(tree);
+
 function showLayered<T>(tree: ArrayBinaryTree<T>): void {
   let take = 1;
   const todo = tree.flatData.slice();
