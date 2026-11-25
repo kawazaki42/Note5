@@ -1,96 +1,27 @@
 import BinaryTree from "./BinaryTree.ts";
 import type { Action, DeepTraverseOptions } from "./BinaryTree.ts";
 
-// export default class ArrayBinaryTree<T> extends BinaryTree<T> {
 export default class ArrayBinaryTree<T> {
-  flatData = [];
+  flatData: T[] = [];
 
   static leftChildOf = (index: number) => index * 2 + 1;
   static rightChildOf = (index: number) => index * 2 + 2;
 
-  // *deepTraverseIterator<T>({
-  //   inverseHorizontal,
-  //   putParentAt,
-  //   // action,
-  //   // startAt: index,
-  // }: DeepTraverseOptions & {
-  //   // action: Action<T>;
-  //   // startAt: number;
-  // }) {
-  //   // yield this.flatData[0];
-  //   let i = 0;
-  //   let item = this.flatData[i];
+  insert(element: T): void {
+    let index = 0;
 
-  //   if (item === undefined)
-  //     return;
+    while (true) {
+      const other = this.flatData[index];
 
-  //   yield item;
-  // }
+      if (other === undefined || other === null) {
+        this.flatData[index] = element;
+        return;
+      }
 
-  // *broadTraverseIterator<T>({
-  //   inverseHorizontal,
-  //   inverseVertical
-  // }: {
-  //   inverseHorizontal: boolean,
-  //   inverseVertical: boolean,
-  // }) {
-
-  // }
-
-  override traverseDeep({
-    inverseHorizontal,
-    putParentAt,
-    action,
-    startAt: index,
-  }: DeepTraverseOptions & {
-    action: Action<T>;
-    startAt: number;
-  }) {
-    // action(flatindex);
-
-    // if (!(index in this.flatData))
-    //     return;
-
-    const data = this.flatData[index];
-
-    if (data === undefined) return;
-
-    action(data);
-
-    const leftChild = ArrayBinaryTree.leftChildOf(index);
-    const rightChild = ArrayBinaryTree.rightChildOf(index);
-
-    const order = [leftChild, rightChild];
-
-    if (inverseHorizontal) order.reverse();
-
-    order.splice(putParentAt ?? 0, 0, index);
-
-    for (const index of order) {
-      this.traverseDeep({
-        inverseHorizontal,
-        putParentAt,
-        startAt: index,
-        action,
-      });
+      if (element < other)
+        index = ArrayBinaryTree.leftChildOf(index);
+      else
+        index = ArrayBinaryTree.rightChildOf(index);
     }
-
-    // this.traverseDeep(right, action);
   }
-
-  override traverseBroad({
-    action,
-    inverseHorizontal,
-    inverseVertical,
-  }: {
-    action: Action<T>;
-    inverseHorizontal: boolean;
-    inverseVertical: boolean;
-  }): void {}
-
-  // override traverseDeep(options: DeepTraverseOptions & {
-  //     action: Action<T>
-  // }) {
-  //     this.traverseDeepFrom(options);
-  // }
 }
