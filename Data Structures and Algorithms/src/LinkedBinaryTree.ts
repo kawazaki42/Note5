@@ -78,7 +78,11 @@ export class LinkedBinaryTreeNode<T> {
     this.right = right ?? null;
   }
 
-  elements(options: TraverseOptions): Generator<T> {
+  elements(options: TraverseOptions): Iterator<T> {
+    return this.nodes(options).map(node => node.data)
+  }
+
+  nodes(options: TraverseOptions): Generator<LinkedBinaryTreeNode<T>> {
     if (options.horizontal)
       return this.traverseBroad(options);
     else
@@ -103,7 +107,7 @@ export class LinkedBinaryTreeNode<T> {
     flipHorizontal,
     putParentAt,
     // action,
-  }: DeepTraverseOptions): Generator<T> {
+  }: DeepTraverseOptions): Generator<LinkedBinaryTreeNode<T>> {
     const subtrees = [this.left, this.right];
 
     if (flipHorizontal) subtrees.reverse();
@@ -114,7 +118,7 @@ export class LinkedBinaryTreeNode<T> {
     for (const sub of subtrees) {
       if (sub === this) {
         // action(this.data);
-        yield this.data
+        yield this;
         continue;
       }
 
@@ -147,7 +151,7 @@ export class LinkedBinaryTreeNode<T> {
     // action: Action<T>;
     flipHorizontal?: boolean;
     flipVertical?: boolean;
-  }): Generator<T> {
+  }): Generator<LinkedBinaryTreeNode<T>> {
     if (flipVertical) {
       // O(n) space algorithm
       // return this.flattenBroad({ inverseVertical }).forEach(action);
@@ -169,7 +173,7 @@ export class LinkedBinaryTreeNode<T> {
         children.forEach((it) => (it ? more.push(it) : void 0));
 
         // action(node.data);
-        yield node.data;
+        yield node;
       }
 
       order = more;
