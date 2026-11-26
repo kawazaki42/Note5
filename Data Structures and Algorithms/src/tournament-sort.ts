@@ -64,7 +64,7 @@ export function popRoot<T>(tree: Node<T>): T {
 
   // let cursor: ChildInfo<T> = {node: tree, parentLink: 'left', parent: null};
 
-  const path: ChildInfo<T>[] = [ {node: tree, parentLink: 'left'} ];
+  const path: ChildInfo<T>[] = [{ node: tree, parentLink: "left" }];
 
   while (true) {
     // const {left, right} = cursor;
@@ -74,25 +74,25 @@ export function popRoot<T>(tree: Node<T>): T {
     if (cursor.node.left?.data === result)
       path.push({
         node: cursor.node.left,
-        parentLink: 'left',
+        parentLink: "left",
       });
-      // cursor = {
-      //   node: cursor.node.left,
-      //   parent: cursor.node,
-      //   parentLink: 'left',
-      // };
-      // cursor = cursor.node.left;
+    // cursor = {
+    //   node: cursor.node.left,
+    //   parent: cursor.node,
+    //   parentLink: 'left',
+    // };
+    // cursor = cursor.node.left;
     else if (cursor.node.right?.data === result)
       path.push({
         node: cursor.node.right,
-        parentLink: 'right',
+        parentLink: "right",
       });
-      // cursor = {
-      //   node: cursor.node.right,
-      //   parent: cursor.node,
-      //   parentLink: 'right',
-      // };
-      // cursor = cursor.right;
+    // cursor = {
+    //   node: cursor.node.right,
+    //   parent: cursor.node,
+    //   parentLink: 'right',
+    // };
+    // cursor = cursor.right;
     else {
       const parent = path.at(-2);
       parent!.node[cursor.parentLink] = null;
@@ -108,36 +108,34 @@ function replay<T>(path: ChildInfo<T>[]): void {
     const cursor = path.pop();
     const parent = path.at(-1);
 
-    if (cursor === undefined)
-      return;
+    if (cursor === undefined) return;
 
     // const {left, right} = cursor.node;
     const comp = compareChildren(cursor.node);
 
     let newData: Node<T>;
 
-    if ('only' in comp)
-      newData = comp.only;
-    else if ('min' in comp)
-      newData = comp.min;
+    if ("only" in comp) newData = comp.only;
+    else if ("min" in comp) newData = comp.min;
     else {
-      if (present(parent))
-        parent.node[cursor.parentLink] = null;
+      if (present(parent)) parent.node[cursor.parentLink] = null;
       continue;
     }
-      // throw Error();
+    // throw Error();
 
-    if (present(parent))
-      cursor.node.data = newData.data;
+    if (present(parent)) cursor.node.data = newData.data;
   }
 }
 
-type ComparisonResult<T> = {
-  min: Node<T>,
-  max: Node<T>,
-} | {
-  only: Node<T>,
-} | {};
+type ComparisonResult<T> =
+  | {
+      min: Node<T>;
+      max: Node<T>;
+    }
+  | {
+      only: Node<T>;
+    }
+  | {};
 
 function present<T>(value: T | null | undefined) {
   return value !== undefined && value !== null;
@@ -148,15 +146,15 @@ function compareChildren<T>(node: Node<T>): ComparisonResult<T> {
     return {
       min: node.left.data < node.right.data ? node.left : node.right,
       max: node.left.data < node.right.data ? node.right : node.left,
-    }
+    };
   }
 
   if (present(node.left)) {
-    return {only: node.left};
+    return { only: node.left };
   }
 
   if (present(node.right)) {
-    return {only: node.right};
+    return { only: node.right };
   }
 
   // if (!present(node.left) && !present(node.right))
@@ -165,6 +163,6 @@ function compareChildren<T>(node: Node<T>): ComparisonResult<T> {
 
 type ChildInfo<T> = {
   // parent: Node<T> | null,
-  parentLink: 'left' | 'right',
-  node: Node<T>,
-}
+  parentLink: "left" | "right";
+  node: Node<T>;
+};

@@ -11,15 +11,15 @@ type Repr<T> = {
 };
 
 type DeepTraverseOptions = {
-  horizontal?: false,
-  flipHorizontal?: boolean,
-  putParentAt?: 0 | 1 | 2,
+  horizontal?: false;
+  flipHorizontal?: boolean;
+  putParentAt?: 0 | 1 | 2;
 };
 
 type BroadTraverseOptions = {
-  horizontal: true,
-  flipHorizontal?: boolean,
-  flipVertical?: boolean,
+  horizontal: true;
+  flipHorizontal?: boolean;
+  flipVertical?: boolean;
 };
 
 export type TraverseOptions = DeepTraverseOptions | BroadTraverseOptions;
@@ -38,8 +38,10 @@ export default class LinkedBinaryTree<T> {
   //   return this.root?.flattenDeep(options) ?? [];
   // }
 
-  *elements(options: TraverseOptions): Generator<T> {
-    yield* (this.root?.elements(options) ?? []);
+  *elements(options: TraverseOptions): IteratorObject<T> {
+    if (!this.root) return;
+
+    yield* this.root.elements(options);
   }
 
   // override traverseBroad(options: {
@@ -78,15 +80,13 @@ export class LinkedBinaryTreeNode<T> {
     this.right = right ?? null;
   }
 
-  elements(options: TraverseOptions): Iterator<T> {
-    return this.nodes(options).map(node => node.data)
+  elements(options: TraverseOptions): IteratorObject<T> {
+    return this.nodes(options).map((node) => node.data);
   }
 
   nodes(options: TraverseOptions): Generator<LinkedBinaryTreeNode<T>> {
-    if (options.horizontal)
-      return this.traverseBroad(options);
-    else
-      return this.traverseDeep(options);
+    if (options.horizontal) return this.traverseBroad(options);
+    else return this.traverseDeep(options);
   }
 
   static fromRecursiveArray<T>([
@@ -123,7 +123,7 @@ export class LinkedBinaryTreeNode<T> {
       }
 
       // sub?.traverseDeep({ action, flipHorizontal, putParentAt });
-      yield* (sub?.traverseDeep({flipHorizontal, putParentAt}) ?? []);
+      yield* sub?.traverseDeep({ flipHorizontal, putParentAt }) ?? [];
     }
   }
 
@@ -155,7 +155,12 @@ export class LinkedBinaryTreeNode<T> {
     if (flipVertical) {
       // O(n) space algorithm
       // return this.flattenBroad({ inverseVertical }).forEach(action);
-      yield* [...this.traverseBroad({flipVertical: false, flipHorizontal: !flipHorizontal})].reverse();
+      yield* this.traverseBroad({
+        flipVertical: false,
+        flipHorizontal: !flipHorizontal,
+      })
+        .toArray()
+        .reverse();
       return;
     }
 
