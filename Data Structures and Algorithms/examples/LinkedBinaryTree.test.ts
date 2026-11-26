@@ -87,14 +87,18 @@ const broadTests = [
 
 describe("linked binary tree", () => {
   describe("deep traverse", () => {
-    test.each(deepTests)("$label", ({ label: _, expected, ...options }) => {
-      expect(sample().flattenDeep(options)).toEqual(expected);
+    test.each(deepTests)("$label", ({ label: _, expected, inverseHorizontal, putParentAt }) => {
+      // expect(sample().flattenDeep(options)).toEqual(expected);
+      const actual = [...sample().elements({flipHorizontal: inverseHorizontal, putParentAt})];
+      expect(actual).toEqual(expected)
     });
   });
 
   describe("broad traverse", () => {
-    test.each(broadTests)("$label", ({ expected, ...options }) => {
-      expect(irregularTree().flattenBroad(options)).toEqual(expected.split(""));
+    test.each(broadTests)("$label", ({ expected, inverseHorizontal, inverseVertical }) => {
+      // expect(irregularTree().flattenBroad(options)).toEqual(expected.split(""));
+      const actual = [...irregularTree().elements({horizontal: true, flipHorizontal: inverseHorizontal, flipVertical: inverseVertical })];
+      expect(actual).toEqual(expected.split(""));
     });
   });
 });

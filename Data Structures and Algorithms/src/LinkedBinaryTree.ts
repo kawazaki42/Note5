@@ -1,5 +1,5 @@
 import BinaryTree from "./BinaryTree.ts";
-import type { Action, DeepTraverseOptions } from "./BinaryTree.ts";
+// import type { Action, DeepTraverseOptions } from "./BinaryTree.ts";
 
 type RecursiveArray<T> =
   [T, RecursiveArray<T> | undefined, RecursiveArray<T> | undefined] | [T];
@@ -10,40 +10,58 @@ type Repr<T> = {
   right?: Repr<T>;
 };
 
-export default class LinkedBinaryTree<T> extends BinaryTree<T> {
+type DeepTraverseOptions = {
+  horizontal?: false,
+  flipHorizontal?: boolean,
+  putParentAt?: 0 | 1 | 2,
+};
+
+type BroadTraverseOptions = {
+  horizontal: true,
+  flipHorizontal?: boolean,
+  flipVertical?: boolean,
+};
+
+export type TraverseOptions = DeepTraverseOptions | BroadTraverseOptions;
+
+export default class LinkedBinaryTree<T> {
   public root: LinkedBinaryTreeNode<T> | null = null;
 
-  override flattenBroad(options: {
-    inverseHorizontal?: boolean;
-    inverseVertical?: boolean;
-  }): T[] {
-    return this.root?.flattenBroad(options) ?? [];
+  // override flattenBroad(options: {
+  //   inverseHorizontal?: boolean;
+  //   inverseVertical?: boolean;
+  // }): T[] {
+  //   return this.root?.flattenBroad(options) ?? [];
+  // }
+
+  // override flattenDeep(options: DeepTraverseOptions): T[] {
+  //   return this.root?.flattenDeep(options) ?? [];
+  // }
+
+  *elements(options: TraverseOptions): Generator<T> {
+    yield* this.root?.elements(options) ?? [];
   }
 
-  override flattenDeep(options: DeepTraverseOptions): T[] {
-    return this.root?.flattenDeep(options) ?? [];
-  }
+  // override traverseBroad(options: {
+  //   action: Action<T>;
+  //   inverseHorizontal: boolean;
+  //   inverseVertical: boolean;
+  // }): void {
+  //   return this.root?.traverseBroad(options);
+  // }
 
-  override traverseBroad(options: {
-    action: Action<T>;
-    inverseHorizontal: boolean;
-    inverseVertical: boolean;
-  }): void {
-    return this.root?.traverseBroad(options);
-  }
-
-  override traverseDeep(
-    options: DeepTraverseOptions & { action: Action<T> },
-  ): void {
-    return this.root?.traverseDeep(options);
-  }
+  // override traverseDeep(
+  //   options: DeepTraverseOptions & { action: Action<T> },
+  // ): void {
+  //   return this.root?.traverseDeep(options);
+  // }
 
   repr(): Repr<T> | string {
     return this.root?.repr() ?? "empty";
   }
 }
 
-export class LinkedBinaryTreeNode<T> extends BinaryTree<T> {
+export class LinkedBinaryTreeNode<T> {
   data: T;
   left: LinkedBinaryTreeNode<T> | null = null;
   right: LinkedBinaryTreeNode<T> | null = null;
@@ -53,11 +71,18 @@ export class LinkedBinaryTreeNode<T> extends BinaryTree<T> {
     left?: LinkedBinaryTreeNode<T>,
     right?: LinkedBinaryTreeNode<T>,
   ) {
-    super();
+    // super();
 
     this.data = data;
     this.left = left ?? null;
     this.right = right ?? null;
+  }
+
+  elements(options: TraverseOptions): Generator<T> {
+    if (options.horizontal)
+      return this.traverseBroad(options);
+    else
+      return this.traverseDeep(options);
   }
 
   static fromRecursiveArray<T>([
@@ -74,73 +99,76 @@ export class LinkedBinaryTreeNode<T> extends BinaryTree<T> {
     return new LinkedBinaryTreeNode(data, left_, right_);
   }
 
-  override traverseDeep({
-    inverseHorizontal,
+  *traverseDeep({
+    flipHorizontal,
     putParentAt,
-    action,
-  }: DeepTraverseOptions & {
-    action: Action<T>;
-  }): void {
+    // action,
+  }: DeepTraverseOptions): Generator<T> {
     const subtrees = [this.left, this.right];
 
-    if (inverseHorizontal) subtrees.reverse();
+    if (flipHorizontal) subtrees.reverse();
 
+    // insert
     subtrees.splice(putParentAt ?? 0, 0, this);
 
     for (const sub of subtrees) {
       if (sub === this) {
-        action(this.data);
+        // action(this.data);
+        yield this.data
         continue;
       }
 
-      sub?.traverseDeep({ action, inverseHorizontal, putParentAt });
+      // sub?.traverseDeep({ action, flipHorizontal, putParentAt });
+      yield* sub?.traverseDeep({flipHorizontal, putParentAt}) ?? [];
     }
   }
 
-  override flattenBroad({
-    inverseHorizontal,
-    inverseVertical,
-  }: {
-    inverseHorizontal?: boolean;
-    inverseVertical?: boolean;
-  }): T[] {
-    if (inverseVertical) {
-      return this.flattenBroad({
-        inverseHorizontal: !inverseHorizontal,
-      }).reverse();
-    } else {
-      return super.flattenBroad({ inverseVertical, inverseHorizontal });
-    }
-  }
+  // flattenBroad({
+  //   inverseHorizontal,
+  //   inverseVertical,
+  // }: {
+  //   inverseHorizontal?: boolean;
+  //   inverseVertical?: boolean;
+  // }): T[] {
+  //   if (inverseVertical) {
+  //     return this.flattenBroad({
+  //       inverseHorizontal: !inverseHorizontal,
+  //     }).reverse();
+  //   } else {
+  //     return super.flattenBroad({ inverseVertical, inverseHorizontal });
+  //   }
+  // }
 
-  override traverseBroad({
-    action,
-    inverseHorizontal = false,
-    inverseVertical = false,
+  *traverseBroad({
+    // action,
+    flipHorizontal = false,
+    flipVertical = false,
   }: {
-    action: Action<T>;
-    inverseHorizontal: boolean;
-    inverseVertical: boolean;
-  }): void {
-    if (inverseVertical) {
+    // action: Action<T>;
+    flipHorizontal?: boolean;
+    flipVertical?: boolean;
+  }): Generator<T> {
+    if (flipVertical) {
       // O(n) space algorithm
-      return this.flattenBroad({ inverseVertical }).forEach(action);
+      // return this.flattenBroad({ inverseVertical }).forEach(action);
+      yield* [...this.traverseBroad({flipVertical: false, flipHorizontal: !flipHorizontal})].reverse();
     }
 
     let order: LinkedBinaryTreeNode<T>[] = [this];
     let more: LinkedBinaryTreeNode<T>[] = [];
 
-    while (order.length) {
+    while (order.length !== 0) {
       // console.log(order.map(it => it.data));
 
       for (const node of order) {
-        const children = inverseHorizontal
+        const children = flipHorizontal
           ? [node.right, node.left]
           : [node.left, node.right];
 
-        children.forEach((it) => (it ? more.push(it) : undefined));
+        children.forEach((it) => (it ? more.push(it) : void 0));
 
-        action(node.data);
+        // action(node.data);
+        yield node.data;
       }
 
       order = more;
