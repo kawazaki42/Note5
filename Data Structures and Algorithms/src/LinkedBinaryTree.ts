@@ -201,3 +201,54 @@ export class LinkedBinaryTreeNode<T> {
     return result;
   }
 }
+
+
+function* linksIn<T>(
+  tree: LinkedBinaryTreeNode<T>,
+): Generator<[number, number, T]> {
+  const nodes = tree.nodes({ horizontal: true, flipVertical: true }).toArray();
+
+  for (const [i, n] of nodes.entries()) {
+    for (const child of [n.left, n.right])
+      if (child !== null) yield [i, nodes.indexOf(child), child.data];
+  }
+
+  const lastIndex = nodes.length - 1;
+  const last = nodes[lastIndex]?.data;
+
+  if (last !== undefined) yield [lastIndex, lastIndex, last];
+}
+
+function* streamMermaid<T>(
+  tree: LinkedBinaryTreeNode<T>,
+  prefix: string | null = "```mermaid\ngraph TD",
+  suffix: string | null = "```",
+): Generator<string> {
+  if (prefix !== null) yield prefix;
+
+  const links = linksIn(tree).toArray();
+
+  const last = links.pop();
+
+  yield* links.map(
+    ([parent, child, childData]) => `${parent} --> ${child}((${childData}))`,
+  );
+
+  if (last !== undefined) {
+    const [parent, child, data] = last;
+
+    console.assert(parent === child);
+
+    yield `${parent}((${data}))`;
+  }
+
+  if (suffix !== null) yield suffix;
+}
+
+export function toMermaid<T>(
+  tree: LinkedBinaryTreeNode<T>,
+  prefix: string | null = "```mermaid\ngraph TD",
+  suffix: string | null = "```",
+): string {
+  return streamMermaid(tree, prefix, suffix).toArray().join("\n");
+}
