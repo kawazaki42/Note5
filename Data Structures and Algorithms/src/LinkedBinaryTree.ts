@@ -39,7 +39,7 @@ export default class LinkedBinaryTree<T> {
   // }
 
   *elements(options: TraverseOptions): Generator<T> {
-    yield* this.root?.elements(options) ?? [];
+    yield* (this.root?.elements(options) ?? []);
   }
 
   // override traverseBroad(options: {
@@ -119,7 +119,7 @@ export class LinkedBinaryTreeNode<T> {
       }
 
       // sub?.traverseDeep({ action, flipHorizontal, putParentAt });
-      yield* sub?.traverseDeep({flipHorizontal, putParentAt}) ?? [];
+      yield* (sub?.traverseDeep({flipHorizontal, putParentAt}) ?? []);
     }
   }
 
@@ -152,6 +152,7 @@ export class LinkedBinaryTreeNode<T> {
       // O(n) space algorithm
       // return this.flattenBroad({ inverseVertical }).forEach(action);
       yield* [...this.traverseBroad({flipVertical: false, flipHorizontal: !flipHorizontal})].reverse();
+      return;
     }
 
     let order: LinkedBinaryTreeNode<T>[] = [this];
